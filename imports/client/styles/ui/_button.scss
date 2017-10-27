@@ -1,0 +1,158 @@
+.button {
+  background: transparent;
+  border: 1px solid #000000;
+  color: #000000;
+  cursor: pointer;
+  font-weight: 400;
+  line-height: 1.25em;
+  margin: 1rem auto 1rem auto;
+  max-width: 100%;
+  outline-color: none;
+  padding: 1rem;
+  transition: background .2s ease, transform .2s ease;
+  word-wrap: break-word;
+
+  &:hover, &:focus {
+    background: #6a747e;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+  }
+
+  &:active {
+  background: #1d2731;
+  }
+}
+
+.button-upcomingTask {
+  background: transparent;
+  border: 1px solid #000000;
+  color: #000000;
+  cursor: default;
+  font-weight: 400;
+  line-height: 1.25em;
+  margin: .5rem;
+  max-width: 100%;
+  outline-color: none;
+  padding: 1rem;
+  transition: background .2s ease, transform .2s ease;
+  vertical-align: middle;
+  word-wrap: break-word;
+
+  &:hover, &:focus {
+    background: #286da8;
+    border: 1px solid #000000;
+    color: #ffffff;
+  }
+
+  &:active {
+  background: #205786;
+  }
+}
+
+.button-assignedTask {
+  background: transparent;
+  border: 1px solid #000000;
+  color: #000000;
+  cursor: default;
+  font-weight: 400;
+  line-height: 1.25em;
+  margin: .5rem;
+  max-width: 100%;
+  outline-color: none;
+  padding: 1rem;
+  transition: background .2s ease, transform .2s ease;
+  vertical-align: middle;
+  word-wrap: break-word;
+
+  &:hover, &:focus {
+    background: rgba(45,168,40,1);
+    border: 1px solid #000000;
+    color: #ffffff;
+  }
+
+  &:active {
+  background: #1B6418;
+  }
+}
+
+.button_center {
+  text-align: center;
+  object-position: center;
+}
+
+.button__green {
+  background: transparent;
+  border:1px solid #555555;
+  color: #555555;
+  cursor: pointer;
+  font-weight: 600;
+  // line-height: 1;
+  margin: 1rem .5rem 1rem .5rem;
+  outline-color: none;
+  padding: 1rem;
+  transition: background .2s ease, transform .2s ease;
+
+  &:hover, &:focus {
+    background: rgba(45, 168, 40, .5);
+  }
+
+  &:active {
+    color: rgba(255, 255, 255, 1);
+    background: rgba(45, 168, 40, 1);
+  }
+}
+
+.button__red {
+  background: transparent;
+  border:1px solid #555555;
+  color: #555555;
+  cursor: pointer;
+  font-weight: 600;
+  margin: 1rem .5rem 1rem .5rem;
+  outline-color: none;
+  padding: 1rem;
+  transition: background .2s ease, transform .2s ease;
+
+  &:hover, &:focus {
+    background: rgba(189, 45, 45, .75);
+  }
+
+  &:active {
+    color: rgba(255, 255, 255, 1);
+    background: rgba(189, 45, 45, 1);
+  }
+}
+
+.button__menu {
+  background: rgba(29, 39, 49, .95);
+  border:1px hidden #555555;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 2.25rem;
+  font-weight: 900;
+  height: 4rem;
+  left: 0px;
+  outline-color: none;
+  padding-top: 1rem;
+  position: fixed;
+  text-align: center;
+  transition: .5s;
+  width: 4.5rem;
+}
+
+.button__image {
+  padding-right: .75rem;
+}
+.button--pos {
+  margin: .5rem .5rem 1.3rem .5rem;
+  padding: .5rem;
+  text-align: center;
+}
+.mbri-redo {
+  font-size: 2.25rem;
+  font-weight: 900;
+}
+.mbri-undo {
+  font-size: 2.25rem;
+  font-weight: 900;
+}

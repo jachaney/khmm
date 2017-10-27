@@ -1,0 +1,173 @@
+.item {
+  background: #ffffff;
+  padding: 1.3rem;
+  text-align: left;
+}
+.item-icon {
+  color: #ffffff;
+}
+.item__top {
+  background: #ffffff;
+  font-size: 3rem;
+  font-weight: 400;
+  // margin-top: 1.3rem;
+  padding: 1.3rem;
+  text-align: center;
+  width: auto;
+}
+.item__bottom {
+  background: #ffffff;
+  font-size: 3rem;
+  font-weight: 400;
+  margin-top: .5rem;
+  padding: 1.3rem .5rem 1.3rem .5rem;
+  text-align: center;
+}
+.item__left {
+  background: #ffffff;
+  margin-top: .5rem;
+  text-align: center;
+}
+.item--left--label {
+  background: #286da8;
+  color: #ffffff;
+  margin-bottom: .75rem;
+}
+.item-needs-work-label{
+  background: rgba(229,189,0,1);
+  color: #ffffff;
+  margin-bottom: .75rem;
+}
+.item--textbox {
+  margin: 0 .5rem 0 .5rem;
+  padding: .5rem 0 .5rem 0;
+  text-align: center;
+  width: 95%;
+}
+.item__right {
+  background: #ffffff;
+  margin-top: .5rem;
+  text-align: center;
+}
+.item--right--color {
+  background: #a86428;
+  color: #ffffff;
+  margin-bottom: .75rem;
+}
+.item__middle {
+  background: #ffffff;
+  margin: .5rem auto 0 auto;
+  text-align: center;
+  // max-width: 50%;
+}
+.item--middle--color {
+  background: #2da828;
+  color: #ffffff;
+  margin-bottom: .75rem;
+}
+.item__message {
+  font-size: 1.3rem;
+  font-style: italic;
+  font-weight: 300;
+}
+.item__text {
+  background: #ffffff;
+  padding: .5rem;
+  text-align: center;
+}
+.item--border {
+  border: 1px solid #000000;
+}
+.item--instruction {
+  background: #03396C;
+  color: #ffffff;
+}
+.item--primeTask {
+  background: #005B96;
+  color: #ffffff;
+  text-align: center;
+}
+.item--primeTask-new {
+  background: #005B96;
+  color: #000000;
+  text-align: center;
+}
+.item--subTask {
+  background: #6497B1;
+  color: #ffffff;
+  text-align: center;
+}
+.item--subTask-new {
+  background: #6497B1;
+  color: #000000;
+  text-align: center;
+}
+.item--padding {
+  padding: 1.3rem 1.3rem 1.3rem 1.3rem;
+}
+.item--task--padding {
+  padding: .5rem 0 .5rem 0;
+}
+.item--checkbox--padding {
+  margin: 1rem 0 1rem 0;
+}
+.item--radius {
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+}
+.item--notes {
+  height: 10rem;
+  width: 100%;
+}
+.item--menubar {
+  background: rgba(29, 39, 49, .8);
+  padding: .5rem 0 .5rem 0;
+  position: fixed;
+  text-align: center;
+  width: 100%;
+  z-index: 1;
+}
+.item--menuitem {
+  color: #ffffff;
+  padding: .25rem 0 .25rem 0;
+  font-weight: 900;
+  text-decoration: none;
+}
+.item--instructions {
+  padding: .5rem 0 .5rem 0;
+  text-align: left;
+  width: 100%;
+}
+.item-datebox {
+  font-size: 1.3rem;
+  width: 15rem;
+}
+.item-workitem {
+  margin-left: 3.5rem;
+  width: 90%;
+}
+.item-hidden {
+  visibility: hidden;
+}
+.mbri-clock {
+  font-size:3rem;
+  font-weight: 900;
+  color:#ffffff;
+}
+.mbri-share {
+  font-size:3rem;
+  font-weight: 900;
+  // color:#ffffff;
+}
+.mbri-like {
+  font-size:3rem;
+  font-weight: 900;
+  color:#ffffff;
+}
+.mbri-flag {
+  font-size:3rem;
+  font-weight: 900;
+  color:#ffffff;
+}

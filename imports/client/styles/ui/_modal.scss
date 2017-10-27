@@ -1,0 +1,63 @@
+.modal-createUser {
+  background-color: rgba(0,0,0,0.4);
+  color: #000000;
+  display: none;
+  height: 100%;
+  left: 0;
+  overflow: auto;
+  position: fixed;
+  scroll-behavior: smooth;
+  top: 0;
+  text-align: center;
+  width: 100%;
+  z-index: 1;
+}
+.modal-assignTask {
+  background-color: rgba(0,0,0,0.4);
+  color: #000000;
+  display: none;
+  height: 100%;
+  left: 0;
+  overflow: auto;
+  position: fixed;
+  scroll-behavior: smooth;
+  text-align: center;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+}
+.modal-content {
+  background-color: #fefefe;
+  height: auto;
+  margin: 8rem auto 8rem auto;
+  padding: 3rem;
+  width: 40rem;
+  max-height: 100%;
+  max-width: 75%;
+}
+.modal_text {
+  color: #000000;
+  margin: auto;
+  padding: 1rem;
+  text-align: center;
+  width: auto;
+}
+.modal_input {
+  margin: .5rem 0 .5rem 0;
+  width: 90%;
+}
+.modal_usericon {
+  font-size:10rem;
+  font-weight: 900;
+  color:#000000;
+  margin: auto;
+}
+.modal_closeicon {
+  color:#000000;
+  cursor: pointer;
+  font-size:2rem;
+  font-weight: 900;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+}

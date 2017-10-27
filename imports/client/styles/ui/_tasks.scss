@@ -1,0 +1,125 @@
+.task-div {
+  border: 1px solid #000000;
+  margin: .5rem 0 0 0;
+  text-align: center;
+}
+.task-info {
+  cursor: default;
+  margin: .5rem;
+  text-align: left;
+}
+.task-pastdue {
+  background: rgba(255,0,0,.03);
+  border: 1px solid rgba(255,0,0,1);
+}
+.task-comingdue {
+  background: rgba(255,210,0,.03);
+  border: 1px solid rgba(255,210,0,1);
+}
+.task__list {
+  margin: 1.3rem;
+  text-align: center;
+}
+.task__item {
+  background: #ffffff;
+  height: auto;
+  object-position: center;
+  width: auto;
+}
+.task__header {
+  background: #428bca;
+  color: #fcfcf9;
+  object-position: center;
+  padding: .5rem;
+}
+.task-header-upcoming {
+  background: #286da8;
+  color: #ffffff;
+  cursor: default;
+  margin-bottom: .75rem;
+  padding: .5rem;
+}
+.task-header-assigned {
+  background: #2da828;
+  color: #ffffff;
+  cursor: default;
+  margin-bottom: .75rem;
+  padding: .5rem;
+}
+.task-header-workneeded {
+  background: rgba(229,189,0,1);
+  color: #ffffff;
+  cursor: default;
+  margin-bottom: .75rem;
+  padding: .5rem;
+}
+.task__prime {
+  background: #38a134;
+  color: #fcfcf9;
+  object-position: center;
+  margin-top: 1.3rem;
+  padding: .5rem;
+  text-align: center;
+  word-wrap: break-word;
+}
+.task__sub {
+  background: #ca8142;
+  color: #fcfcf9;
+  object-position: center;
+  margin-top: 1.3rem;
+  padding: .5rem;
+  text-align: center;
+  word-wrap: break-word;
+}
+.task__background {
+  background: #ffffff;
+  clear: both;
+  object-position: center;
+  margin: 1.3rem 0 0 1.3rem;
+  padding: 1.3rem;
+  text-align: center;
+}
+.task__button {
+  background: transparent;
+  border:1px solid #a9a9a9;
+  color: #555555;
+  cursor: pointer;
+  font-weight: 600;
+  margin: .5rem auto .5rem auto;
+  max-width: 100%;
+  padding: 1.3rem .5rem 1.3rem .5rem;
+  text-align: center;
+  transition: background .2s ease, transform .2s ease;
+  word-wrap: break-word;
+
+  &:hover, &:focus {
+    background: #eaf1dd;
+  }
+
+  &:active {
+    background: #bbd495;
+  }
+}
+.task--radius {
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+}
+.task--instructions {
+  text-align: center;
+}
+.task--left {
+  display: inline;
+  float: left;
+  height: auto;
+  margin-right: 1.3rem;
+  object-position: center;
+  padding-bottom: 1.3rem;
+  width: auto;
+}
+.task--right {
+  float: inherit;
+  margin-right: 1.3rem;
+  padding-bottom: 1.3rem;
+}

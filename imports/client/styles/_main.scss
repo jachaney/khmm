@@ -1,0 +1,34 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body{
+  background: #f2f2f2;
+  color: #555555;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 1.6rem;
+}
+
+input, button, select {
+  font-size: 1.6rem;
+}
+
+h1 {
+  font-weight: 300;
+  font-size: 3.5rem;
+}
+
+@import './ui/button';
+@import './ui/item';
+@import './ui/loader';
+@import './ui/menu';
+@import './ui/modal';
+@import './ui/sidenav';
+@import './ui/style';
+@import './ui/tasks';
+@import './ui/wrapper';
