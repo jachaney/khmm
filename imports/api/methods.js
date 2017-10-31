@@ -300,7 +300,7 @@ Meteor.methods({
       createdOn: new Date()
     })
   },
-  'userinfo.insert' ( email, firstname, lastname, cong ) {
+  'userinfo.insert' ( email, firstname, lastname ) {
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
     }
@@ -316,7 +316,6 @@ Meteor.methods({
       email,
       firstname,
       lastname,
-      cong,
       primeId: Meteor.user().profile.primeId,
       userId: this.userId,
       isAdmin: true
