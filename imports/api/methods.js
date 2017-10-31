@@ -304,6 +304,14 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
     }
+    Meteor.users.update ({_id: this.userId},
+      {$set: {
+        profile: {
+          isAdmin: true,
+          primeId: this.userId
+        }
+      }
+    },{upsert: true})
     UserInfoDB.insert({
       email,
       firstname,
