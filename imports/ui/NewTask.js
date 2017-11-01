@@ -50,13 +50,15 @@ export default class NewTask extends React.Component {
       const tasks = TaskList.find({formId: newId}).fetch();
       this.setState({ tasks });
       this.state.tasks.map((task) => {
-        this.refs.primeTask.value = task.taskName;
-        this.refs.subTask.value = task.subTask;
-        this.refs.instructions.value = task.instructions;
-        this.refs.frequency.value = task.frequency;
-        this.refs.reminder.value = task.reminder;
-        if (!!task.caution) {
-          this.refs.caution.value = task.caution;
+        if (!!task.taskName) {
+          this.refs.primeTask.value = task.taskName;
+          this.refs.subTask.value = task.subTask;
+          this.refs.instructions.value = task.instructions;
+          this.refs.frequency.value = task.frequency;
+          this.refs.reminder.value = task.reminder;
+          if (!!task.caution) {
+            this.refs.caution.value = task.caution;
+          }
         }
       })
       Meteor.subscribe('workitems');
@@ -266,20 +268,22 @@ export default class NewTask extends React.Component {
           onSubmit={this.goSave.bind(this)}>
           <div className="item__top item--instruction">
             <h2>Task Instruction Card</h2>
-          </div>
-          <div className="item__middle">
             <p>Select a pre-defined task...</p>
-            <select ref="defaultTaskSelect" onChange={(e) => {
-              e.preventDefault();
-              let formId = Session.get('formId');
-              let val = this.refs.defaultTaskSelect.value;
-              Meteor.call('task.remove', formId);
-              Meteor.call('task.selectDefault', formId, val);
-            }}>
-              <option value=""></option>
-              {this.renderDefaultTasks()}
-            </select>
-            <p>...or build your own task card.</p>
+            <select ref="defaultTaskSelect" className="item-select"
+              onChange={(e) => {
+                e.preventDefault();
+                let formId = Session.get('formId');
+                let val = this.refs.defaultTaskSelect.value;
+                Meteor.call('task.remove', formId);
+                Meteor.call('task.selectDefault', formId, val);
+              }
+            }>
+            <option value=""></option>
+            {this.renderDefaultTasks()}
+          </select>
+          <p>...or build your own task card.</p>
+          {/* </div>
+          <div className="item__middle item--instruction"> */}
           </div>
           <div className="pure-g">
             <div className="pure-u-1 item--primeTask-new item--task--padding">
