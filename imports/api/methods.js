@@ -5,6 +5,7 @@ import moment from 'moment';
 import shortid from 'shortid';
 import SimpleSchema from 'simpl-schema';
 import { Session } from 'meteor/session';
+import { Random } from 'meteor/random';
 
 export const UserInfoDB = new Mongo.Collection('userinfo');
 export const TaskList = new Mongo.Collection('tasks');
@@ -35,6 +36,18 @@ export const Notes = new Mongo.Collection('notes');
     Meteor.publish('users', function() {
       return UserInfoDB.find ({primeId: Meteor.user().profile.primeId});
     });
+    Meteor.publish('defaultTasks', function() {
+      return TaskList.find ({primeId: "defaultTask"});
+    });
+    Meteor.publish('defaultNotes', function() {
+      return Notes.find ({primeId: "defaultTask"});
+    });
+    Meteor.publish('defaultRemItems', function() {
+      return RemItems.find ({primeId: "defaultTask"});
+    });
+    Meteor.publish('defaultWorkItems', function() {
+      return WorkItems.find ({primeId: "defaultTask"});
+    });
   }
 
 Meteor.methods({
@@ -42,23 +55,26 @@ Meteor.methods({
       if (!this.userId) {
         throw new Meteor.Error('Unauthorized access');
       }
-      let primeId = UserInfoDB.find({ userId: this.userId }).fetch();
-      primeId.map((primeId) => {
+      // let primeId = UserInfoDB.find({ userId: this.userId }).fetch();
+      // primeId.map((primeId) => {
         TaskList.insert({
           assignedId: '',
           createdBy: Meteor.user().emails[0].address,
           frequency: "1",
           formId: newId,
-          primeId: primeId.primeId,
+          primeId: Meteor.user().profile.primeId,
+          // primeId: Meteor.user().profile.primeId,
           createdOn: new Date()
         });
-      });
+      // });
   },
   'task.remove'(formId) {
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
     }
     TaskList.remove({formId});
+    WorkItems.remove({formId});
+    RemItems.remove({formId});
   },
   'task.assign' (taskId, assignedId, firstname, lastname, assignedOn) {
     if (!this.userId) {
@@ -98,6 +114,29 @@ Meteor.methods({
       checked: false
       }
     },{multi: true});
+  },
+  'task.selectDefault'(formId, val) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    TaskList.find({formId: val}).forEach(function(item) {
+      item._id = Random.id();
+      item.primeId = Meteor.user().profile.primeId;
+      item.formId = formId;
+      TaskList.insert(item);
+    })
+    RemItems.find({formId: val}).forEach(function(item) {
+      item._id = Random.id();
+      item.primeId = Meteor.user().profile.primeId;
+      item.formId = formId;
+      RemItems.insert(item);
+    })
+    WorkItems.find({formId: val}).forEach( function(item) {
+      item._id = Random.id();
+      item.primeId = Meteor.user().profile.primeId;
+      item.formId = formId;
+      WorkItems.insert(item);
+    })
   },
   'task.workneeded'(formId) {
     if (!this.userId) {

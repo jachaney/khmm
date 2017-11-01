@@ -224,11 +224,11 @@ export default class WorkTask extends React.Component {
                 <p className="pure-u-1-2" ref="createdDate"/>
               </div>
               <div className="pure-u-1 item__middle">
-                <button className="button button--pos"
+                <button className="button__grey"
                   onClick={() => {this.props.history.push('/mgmt');}}>
                   Home
                 </button>
-                <button className="button button--pos" onClick={(e) => {
+                <button className="button__green" onClick={(e) => {
                   let c = $('input[type=checkbox]:checked').length;
                   let b = document.taskOptions.checkbox.length;
                   if (c === b && !this.refs.notes.value) {

@@ -86,7 +86,6 @@
   color: #555555;
   cursor: pointer;
   font-weight: 600;
-  // line-height: 1;
   margin: 1rem .5rem 1rem .5rem;
   outline-color: none;
   padding: 1rem;
@@ -101,6 +100,26 @@
     background: rgba(45, 168, 40, 1);
   }
 }
+.button__grey {
+  background: transparent;
+  border:1px solid #555555;
+  color: #555555;
+  cursor: pointer;
+  font-weight: 600;
+  margin: 1rem .5rem 1rem .5rem;
+  outline-color: none;
+  padding: 1rem;
+  transition: background .2s ease, transform .2s ease;
+
+  &:hover, &:focus {
+    background: #DDDDDD;
+  }
+
+  &:active {
+    background: #9a9a9a;
+    color: #555555;
+  }
+}
 
 .button__red {
   background: transparent;
@@ -108,7 +127,7 @@
   color: #555555;
   cursor: pointer;
   font-weight: 600;
-  margin: 1rem .5rem 1rem .5rem;
+  margin: 0 .5rem 0 .5rem;
   outline-color: none;
   padding: 1rem;
   transition: background .2s ease, transform .2s ease;
