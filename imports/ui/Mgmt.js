@@ -90,6 +90,7 @@ export default class Mgmt extends React.Component {
       isAdmin = false;
     }
     Meteor.call('user.create', email, password, isAdmin, firstname, lastname);
+    alert("User created")
     this.refs.createUserModal.style.display = "none";
   }
 
@@ -108,7 +109,7 @@ export default class Mgmt extends React.Component {
       document.getElementById("mySidenav").style.width = "25rem";
       document.getElementById("sidenav-button").style.left = "25rem";
       this.setState({menuStatus: true});
-      document.getElementById("sidenav-button-icon").className = "mbri-close";
+      document.getElementById("sidenav-button-icon").className = "mbri-close mbri-close-white";
     } else {
       document.getElementById("mySidenav").style.width = "0";
       document.getElementById("sidenav-button").style.left = "0";
@@ -166,6 +167,21 @@ export default class Mgmt extends React.Component {
                 localStorage.setItem("selectedTaskId", task._id);
                 this.refs.assignTaskModal.style.display = "block";
             }}>Assign Task</button>
+            <button className="button__green" ref="editTaskButton"
+              title="Edit Task"
+              onClick={(e) => {
+                e.preventDefault();
+                localStorage.setItem("formId", task.formId);
+                history.push(`/edit_${task.formId}`);
+                history.go();
+              }}>Edit Task</button>
+            <button className="button__red" ref="delTaskButton"
+              title="Delete Task"
+              onClick={(e) => {
+                e.preventDefault();
+                localStorage.setItem("selectedTaskId", task.formId);
+                this.refs.delTaskModal.style.display = "block";
+            }}>Delete Task</button>
             {/* Assign Task modal div starts here. */}
             <div ref="assignTaskModal" className="modal-assignTask">
               <div className="modal-content">
@@ -206,6 +222,34 @@ export default class Mgmt extends React.Component {
               </div>
             </div>
             {/* Assign Task Modal ends here */}
+            {/* Delete Task modal div starts here. */}
+            <div ref="delTaskModal" className="modal-assignTask">
+              <div className="modal-content">
+                <span className="mbri-trash modal_usericon"/>
+                <h2 ref="delTaskLabel" className="modal_text">Are you sure that you want to delete this task?</h2>
+                <form>
+                  <div>
+                    <button className="button__red"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        let formId = localStorage.getItem('selectedTaskId');
+                        Meteor.call('task.remove', formId);
+                        this.refs.delTaskModal.style.display = "none";
+                      }}>
+                        Yes
+                    </button>
+                    <button className="button__red"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        this.refs.delTaskModal.style.display = "none";
+                      }}>
+                        No
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            {/* Delete Task Modal ends here */}
           </div>
         };
       })
@@ -286,7 +330,7 @@ export default class Mgmt extends React.Component {
                 {task.taskName}
               </p>
             </div>
-            <button className="button-upcomingTask" ref="assignTaskButton"
+            <button className="button__yellow" ref="assignTaskButton"
               title="Assign Task"
               onClick={(e) => {
                 e.preventDefault();

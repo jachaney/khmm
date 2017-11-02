@@ -168,7 +168,7 @@ export default class WorkTask extends React.Component {
         <div id="loader" className="loader"></div>
         <div id="content">
           <form name="taskOptions" id="primeForm">
-            <div className="item__top item--instruction">
+            <div className="item-instruction">
               <h2>Task Instruction Card</h2>
             </div>
             <div className="pure-g">
@@ -223,7 +223,7 @@ export default class WorkTask extends React.Component {
                 <p className="pure-u-1-2" ref="createdBy"/>
                 <p className="pure-u-1-2" ref="createdDate"/>
               </div>
-              <div className="pure-u-1 item__middle">
+              <div className="pure-u-1 item__middle item-background">
                 <button className="button__grey"
                   onClick={() => {this.props.history.push('/mgmt');}}>
                   Home

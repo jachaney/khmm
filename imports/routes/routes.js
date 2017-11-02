@@ -16,11 +16,12 @@ import NotFound from '../ui/NotFound';
 import UserInfo from '../ui/UserInfo';
 import NewTask from '../ui/NewTask';
 import WorkTask from '../ui/Task';
+import EditTask from '../ui/EditTask';
 
 const history = createHistory();
 
 const unAuthPages = ['/', '/newuser'];
-const authPages = ['/mgmt', '/userinfo', '/newtask', '/worktask'];
+const authPages = ['/mgmt', '/userinfo', '/newtask', '/worktask', '/edittask'];
 const pathname = location.pathname;
 const isUnAuthPage = unAuthPages.includes(pathname);
 const isAuthPage = authPages.includes(pathname);
@@ -62,6 +63,7 @@ const isAuth = !!Meteor.userId();
         <PrivateRoute exact path="/mgmt" component={ Mgmt }/>
         <PrivateRoute exact path="/userinfo" component={ UserInfo }/>
         <PrivateRoute exact path="/newtask" component={ NewTask }/>
+        <PrivateRoute exact path="/edit_:id" component={ EditTask }/>
         <PrivateRoute exact path="/:id" component={ WorkTask }/>
         <Route component={ NotFound }/>
       </Switch>

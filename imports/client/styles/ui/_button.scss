@@ -25,12 +25,12 @@
 
 .button-upcomingTask {
   background: transparent;
-  border: 1px solid #000000;
-  color: #000000;
+  border: 1px solid #555555;
+  color: #555555;
   cursor: default;
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.25em;
-  margin: .5rem;
+  margin: 1rem .5rem 1rem .5rem;
   max-width: 100%;
   outline-color: none;
   padding: 1rem;
@@ -51,12 +51,12 @@
 
 .button-assignedTask {
   background: transparent;
-  border: 1px solid #000000;
-  color: #000000;
+  border: 1px solid #555555;
+  color: #555555;
   cursor: default;
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.25em;
-  margin: .5rem;
+  margin: 1rem .5rem 1rem .5rem;
   max-width: 100%;
   outline-color: none;
   padding: 1rem;
@@ -84,15 +84,18 @@
   background: transparent;
   border:1px solid #555555;
   color: #555555;
-  cursor: pointer;
+  cursor: default;
   font-weight: 600;
+  line-height: 1.25em;
   margin: 1rem .5rem 1rem .5rem;
   outline-color: none;
   padding: 1rem;
   transition: background .2s ease, transform .2s ease;
+  vertical-align: middle;
 
   &:hover, &:focus {
-    background: rgba(45, 168, 40, .5);
+    color: rgba(255, 255, 255, 1);
+    background: rgba(45, 168, 40, .75);
   }
 
   &:active {
@@ -100,16 +103,40 @@
     background: rgba(45, 168, 40, 1);
   }
 }
-.button__grey {
+.button__yellow {
   background: transparent;
   border:1px solid #555555;
   color: #555555;
-  cursor: pointer;
+  cursor: default;
   font-weight: 600;
+  line-height: 1.25em;
   margin: 1rem .5rem 1rem .5rem;
   outline-color: none;
   padding: 1rem;
   transition: background .2s ease, transform .2s ease;
+  vertical-align: middle;
+
+  &:hover, &:focus {
+    background: rgba(229, 189, 0, .5);
+  }
+
+  &:active {
+    color: rgba(255, 255, 255, 1);
+    background: rgba(229, 189, 0, 1);
+  }
+}
+.button__grey {
+  background: transparent;
+  border:1px solid #555555;
+  color: #555555;
+  cursor: default;
+  font-weight: 600;
+  line-height: 1.25em;
+  margin: 1rem .5rem 1rem .5rem;
+  outline-color: none;
+  padding: 1rem;
+  transition: background .2s ease, transform .2s ease;
+  vertical-align: middle;
 
   &:hover, &:focus {
     background: #DDDDDD;
@@ -117,7 +144,7 @@
 
   &:active {
     background: #9a9a9a;
-    color: #555555;
+    color: #ffffff;
   }
 }
 
@@ -125,19 +152,46 @@
   background: transparent;
   border:1px solid #555555;
   color: #555555;
-  cursor: pointer;
+  cursor: default;
   font-weight: 600;
-  margin: 0 .5rem 0 .5rem;
+  margin: 1rem .5rem 1rem .5rem;
+  line-height: 1.25em;
   outline-color: none;
   padding: 1rem;
   transition: background .2s ease, transform .2s ease;
+  vertical-align: middle;
 
   &:hover, &:focus {
+    color: #ffffff;
     background: rgba(189, 45, 45, .75);
   }
 
   &:active {
-    color: rgba(255, 255, 255, 1);
+    color: #ffffff;
+    background: rgba(189, 45, 45, 1);
+  }
+}
+
+.button-deleteItem {
+  background: transparent;
+  border:1px solid #555555;
+  color: #555555;
+  cursor: default;
+  font-weight: 600;
+  margin: 0 .5rem 1rem .5rem;
+  line-height: 1.25em;
+  outline-color: none;
+  padding: .75rem;
+  transition: background .2s ease, transform .2s ease;
+  vertical-align: middle;
+
+  &:hover, &:focus {
+    color: #ffffff;
+    background: rgba(189, 45, 45, .75);
+  }
+
+  &:active {
+    color: #ffffff;
     background: rgba(189, 45, 45, 1);
   }
 }
@@ -146,7 +200,7 @@
   background: rgba(29, 39, 49, .95);
   border:1px hidden #555555;
   color: #ffffff;
-  cursor: pointer;
+  cursor: default;
   font-size: 2.25rem;
   font-weight: 900;
   height: 4rem;

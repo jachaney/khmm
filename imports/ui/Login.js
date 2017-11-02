@@ -54,10 +54,10 @@ export default class Login extends React.Component {
           image = "https://image.flaticon.com/icons/svg/564/564939.svg"/>
         </div>
         <form className="pure-g" id="login" onSubmit={this.onSubmit.bind(this)} noValidate>
-          <div className="pure-u-1 item__middle">
+          <div className="pure-u-1 item__middle item-margin">
             <input className="item--textbox" type="email" ref="email" name="email" placeholder="Please enter your e-mail address"/>
           </div>
-          <div className="pure-u-1 item__middle">
+          <div className="pure-u-1 item__middle item-margin">
             <input className="item--textbox" type="password" ref="password" name="password" placeholder="Please enter your password"/>
           </div>
           <div className="pure-u-1 item__middle">

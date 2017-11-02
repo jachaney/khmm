@@ -5,16 +5,15 @@ import { Tracker } from 'meteor/tracker';
 import { Session } from 'meteor/session';
 import { Random } from 'meteor/random';
 import moment from 'moment';
-import DatePicker from 'react-datepicker';
 
-import { Notes } from './../api/methods';
 import { RemItems } from './../api/methods';
 import { TaskList } from './../api/methods';
 import { WorkItems } from './../api/methods';
 
 const history = createHistory();
+const formId = localStorage.getItem('formId');
 
-export default class NewTask extends React.Component {
+export default class EditTask extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -23,23 +22,15 @@ export default class NewTask extends React.Component {
       remItems: [],
       tasks:[],
       workItems: [],
-      defaultTasks: [],
-      defaultWorkItems: [],
-      defaultNotes: [],
-      defaultRemItems: []
     };
   }
 
   componentDidMount() {
-    Session.set('formId', Random.id());
-    let newId = Session.get('formId');
-    Meteor.call('task.new', newId);
+    document.getElementById('content').style.display = "none";
+    Session.set('formId', formId);
     this.formTracker = Tracker.autorun(() => {
-      Meteor.subscribe('notes');
-      const notes = Notes.find().fetch();
-      this.setState({ notes });
       Meteor.subscribe('remitems');
-      const remItems = RemItems.find({formId: newId}).fetch();
+      const remItems = RemItems.find({formId: formId}).fetch();
       this.setState({ remItems });
       this.state.remItems.map((item) => {
         if (!!item.label) {
@@ -47,12 +38,13 @@ export default class NewTask extends React.Component {
         }
       })
       Meteor.subscribe('tasks');
-      const tasks = TaskList.find({formId: newId}).fetch();
+      const tasks = TaskList.find({formId: formId}).fetch();
       this.setState({ tasks });
       this.state.tasks.map((task) => {
         if (!!task.taskName) {
           this.refs.primeTask.value = task.taskName;
           this.refs.subTask.value = task.subTask;
+          this.refs.dueDate.value = task.dueDate;
           this.refs.instructions.value = task.instructions;
           this.refs.frequency.value = task.frequency;
           this.refs.reminder.value = task.reminder;
@@ -62,7 +54,7 @@ export default class NewTask extends React.Component {
         }
       })
       Meteor.subscribe('workitems');
-      const workItems = WorkItems.find({formId: newId}).fetch();
+      const workItems = WorkItems.find({formId: formId}).fetch();
       this.setState({ workItems });
       this.state.workItems.map((item) => {
         if (!!item.label) {
@@ -72,18 +64,6 @@ export default class NewTask extends React.Component {
           document.getElementById(`${item.subTitleId}`).value = item.subTitle;
         }
       })
-      Meteor.subscribe('defaultTasks');
-      const defaultTasks = TaskList.find({primeId: "defaultTask"}).fetch();
-      this.setState({ defaultTasks });
-      Meteor.subscribe('defaultRemItems');
-      const defaultRemItems = RemItems.find({primeId: "defaultTask"}).fetch();
-      this.setState({ defaultRemItems });
-      Meteor.subscribe('defaultWorkItems');
-      const defaultWorkItems = WorkItems.find({primeId: "defaultTask"}).fetch();
-      this.setState({ defaultWorkItems });
-      Meteor.subscribe('defaultNotes');
-      const defaultNotes = Notes.find({primeId: "defaultTask"}).fetch();
-      this.setState({ defaultNotes });
     });
   }
 
@@ -129,17 +109,17 @@ export default class NewTask extends React.Component {
             Meteor.call('workItem.remove', _id)}}>
             <span id="rem-work-icon" className="mbri-close"/>
           </button>
-        <p className="pure-u-1-24 item-hidden">Spacer</p>
-        <textarea ref={workItem.label} id={workItem.labelId}
-          className="pure-u-21-24"
-          placeholder="Please enter the task information here"
-          onChange={(e) => {
-            e.preventDefault();
-            let _id = workItem._id;
-            let ref = workItem.label;
-            let label = document.getElementById(`${workItem.labelId}`).value.trim();
-            Meteor.call('workItem.label.update', label, _id);
-        }}/>
+          <p className="pure-u-1-24 item-hidden">Spacer</p>
+          <textarea ref={workItem.label} id={workItem.labelId}
+            className="pure-u-21-24"
+            placeholder="Please enter the task information here"
+            onChange={(e) => {
+              e.preventDefault();
+              let _id = workItem._id;
+              let ref = workItem.label;
+              let label = document.getElementById(`${workItem.labelId}`).value.trim();
+              Meteor.call('workItem.label.update', label, _id);
+            }}/>
       </div>
     });
   }
@@ -219,11 +199,6 @@ export default class NewTask extends React.Component {
     let caution = this.refs.caution.value;
     Meteor.call('caution.update', caution, formId);
   }
-  goCancel() {
-    let formId = Session.get('formId');
-    Meteor.call('task.remove', formId);
-      this.props.history.push('/mgmt');
-  }
   goSave(e) {
     e.preventDefault();
     let formId = Session.get('formId');
@@ -252,115 +227,99 @@ export default class NewTask extends React.Component {
         this.props.history.go();
       };
   }
-  renderDefaultTasks() {
-    return this.state.defaultTasks.map((defaultTask) => {
-      return <option key={defaultTask._id} value={defaultTask.formId}>
-        {defaultTask.subTask}
-      </option>
-    })
+
+  showContent() {
+    setTimeout(function() {
+      document.getElementById('loader').style.display = "none";
+      document.getElementById('content').style.display = "block";
+    }, 1500);
   }
 
   render() {
     return (
       <div id="wrapper" className="wrapper">
-        <form name="taskOptions" id="primeForm"
-          onSubmit={this.goSave.bind(this)}>
-          <div className="item-instruction">
-            <h2>Task Instruction Card</h2>
-            <p>Select a pre-defined task...</p>
-            <select ref="defaultTaskSelect" className="item-select"
-              onChange={(e) => {
-                e.preventDefault();
-                let formId = Session.get('formId');
-                let val = this.refs.defaultTaskSelect.value;
-                Meteor.call('task.remove', formId);
-                Meteor.call('task.selectDefault', formId, val);
-              }
-            }>
-            <option value=""></option>
-            {this.renderDefaultTasks()}
-          </select>
-          <p>...or build your own task card.</p>
-          {/* </div>
-          <div className="item__middle item--instruction"> */}
-          </div>
-          <div className="pure-g item-background">
-            <div className="pure-u-1 item--primeTask-new item--task--padding">
-              <input type="text" ref="primeTask"
-                placeholder="Enter the primary task name here..."
-                className="item--textbox"
-                onChange={this.saveTaskname.bind(this)}/>
+        <div id="loader" className="loader"></div>
+        <div id="content">
+          <form name="taskOptions" id="primeForm"
+            onSubmit={this.goSave.bind(this)}>
+            <div className="item-instruction">
+              <h2>Task Instruction Card</h2>
             </div>
-            <div className="pure-u-1 item--subTask-new item--task--padding">
-              <input type="text" ref="subTask"
-                placeholder="Enter the sub-task name here..."
-                className="item--textbox"
-                onChange={this.saveSubTask.bind(this)}/>
-            </div>
-            <div className="pure-u-1 item">
-              <h3>Instructions:</h3>
-              <textarea type="text" ref="instructions"
-                onChange={this.saveInstructions.bind(this)}
-                className="item--instructions"/>
-            </div>
-            <div className="pure-u-1 item__middle">
-              <div className="pure-u-1 pure-u-md-1-2">
-                <h3>Due Date:</h3>
-                <input type="date" ref="dueDate"
-                  onChange={this.saveDueDate.bind(this)}/>
+            <div className="pure-g item-background">
+              <div className="pure-u-1 item--primeTask-new item--task--padding">
+                <input type="text" ref="primeTask"
+                  placeholder="Enter the primary task name here..."
+                  className="item--textbox"
+                  onChange={this.saveTaskname.bind(this)}/>
               </div>
-              <div className="pure-u-1 pure-u-md-1-2">
-                <h3>Frequency:</h3>
-                <select name="frequency" ref="frequency"
-                  onChange={this.saveFrequency.bind(this)}>
-                  <option name="onemonth" value="1">Monthly</option>
-                  <option name="threemonth" value="3">Quarterly</option>
-                  <option name="semiann" value="6">Semiannually</option>
-                  <option name="yearly" value="12">Yearly</option>
-                </select>
+              <div className="pure-u-1 item--subTask-new item--task--padding">
+                <input type="text" ref="subTask"
+                  placeholder="Enter the sub-task name here..."
+                  className="item--textbox"
+                  onChange={this.saveSubTask.bind(this)}/>
+              </div>
+              <div className="pure-u-1 item">
+                <h3>Instructions:</h3>
+                <textarea type="text" ref="instructions"
+                  onChange={this.saveInstructions.bind(this)}
+                  className="item--instructions"/>
+              </div>
+              <div className="pure-u-1 item__middle">
+                <div className="pure-u-1 pure-u-md-1-2">
+                  <h3>Due Date:</h3>
+                  <input type="date" ref="dueDate"
+                    onChange={this.saveDueDate.bind(this)}/>
+                </div>
+                <div className="pure-u-1 pure-u-md-1-2">
+                  <h3>Frequency:</h3>
+                  <select name="frequency" ref="frequency"
+                    onChange={this.saveFrequency.bind(this)}>
+                    <option name="onemonth" value="1">Monthly</option>
+                    <option name="threemonth" value="3">Quarterly</option>
+                    <option name="semiann" value="6">Semiannually</option>
+                    <option name="yearly" value="12">Yearly</option>
+                  </select>
+                </div>
+              </div>
+              <div className="pure-u-1 item">
+                <h3>Reminder:</h3>
+                <textarea ref="reminder" onChange={this.saveReminder.bind(this)}
+                  className="item--instructions"/>
+                <h3>Caution/Task Notes:</h3>
+                <textarea type="text" ref="caution" className="item--instructions"
+                  onChange={this.saveCaution.bind(this)}/>
+              </div>
+              <div id="remArea" className="pure-u-1">
+                {this.renderRemItems()}
+              </div>
+              <div className="pure-u-1 item__middle">
+                <button className="button__grey"
+                   onClick={this.addReminder.bind(this)}>
+                  Add Reminder Item
+                </button>
+              </div>
+              <div className="pure-u-1" id="workitems">
+                {this.renderWorkItems()}
+              </div>
+              <div className="pure-u-1 item__middle">
+                <button className="button__grey"
+                  onClick={this.addWork.bind(this)}>Add Work Item</button>
+              </div>
+              <div className="pure-u-1 item">
+                <h3>Additional Notes/Additional Repairs Needed</h3>
+                <textarea ref="notes" className="item--instructions"
+                  onChange={this.saveNotes.bind(this)}/>
+              </div>
+              <div className="pure-u-1 item__middle">
+                <button ref="createTask" type="submit"
+                  className="button__green">
+                  Save
+                </button>
               </div>
             </div>
-            <div className="pure-u-1 item">
-              <h3>Reminder:</h3>
-              <textarea ref="reminder" onChange={this.saveReminder.bind(this)}
-                className="item--instructions"/>
-              <h3>Caution:</h3>
-              <textarea type="text" ref="caution" className="item--instructions"
-                onChange={this.saveCaution.bind(this)}/>
-            </div>
-            <div id="remArea" className="pure-u-1">
-              {this.renderRemItems()}
-            </div>
-            <div className="pure-u-1 item__middle">
-              <button className="button__grey"
-                 onClick={this.addReminder.bind(this)}>
-                Add Reminder Item
-              </button>
-            </div>
-            <div className="pure-u-1" id="workitems">
-              {this.renderWorkItems()}
-            </div>
-            <div className="pure-u-1 item__middle">
-              <button className="button__grey"
-                onClick={this.addWork.bind(this)}>Add Work Item</button>
-            </div>
-            <div className="pure-u-1 item">
-              <h3>Notes/Additional Repairs Needed</h3>
-              <textarea ref="notes" className="item--instructions"
-                onChange={this.saveNotes.bind(this)}/>
-            </div>
-            <div className="pure-u-1 item__middle">
-              <button ref="createTask" type="submit"
-                className="button__green">
-                Save
-              </button>
-              <button onClick={this.goCancel.bind(this)}
-                className="button__red">
-                Cancel
-              </button>
-            </div>
-          </div>
-        </form>
+          </form>
+        </div>
+        {this.showContent()}
       </div>
     )
   };
