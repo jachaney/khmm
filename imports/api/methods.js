@@ -55,18 +55,14 @@ Meteor.methods({
       if (!this.userId) {
         throw new Meteor.Error('Unauthorized access');
       }
-      // let primeId = UserInfoDB.find({ userId: this.userId }).fetch();
-      // primeId.map((primeId) => {
         TaskList.insert({
           assignedId: '',
           createdBy: Meteor.user().emails[0].address,
           frequency: "1",
           formId: newId,
           primeId: Meteor.user().profile.primeId,
-          // primeId: Meteor.user().profile.primeId,
           createdOn: new Date()
         });
-      // });
   },
   'task.remove'(formId) {
     if (!this.userId) {

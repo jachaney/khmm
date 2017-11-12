@@ -281,8 +281,6 @@ export default class NewTask extends React.Component {
             {this.renderDefaultTasks()}
           </select>
           <p>...or build your own task card.</p>
-          {/* </div>
-          <div className="item__middle item--instruction"> */}
           </div>
           <div className="pure-g item-background">
             <div className="pure-u-1 item--primeTask-new item--task--padding">
@@ -317,6 +315,7 @@ export default class NewTask extends React.Component {
                   <option name="threemonth" value="3">Quarterly</option>
                   <option name="semiann" value="6">Semiannually</option>
                   <option name="yearly" value="12">Yearly</option>
+                  <option name="donotrepeat" value="0">Do Not Repeat</option>
                 </select>
               </div>
             </div>

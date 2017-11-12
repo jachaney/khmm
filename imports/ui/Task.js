@@ -237,9 +237,12 @@ export default class WorkTask extends React.Component {
                       let dueDateObj = moment(task.dueDate).add(task.frequency, 'months');
                       let dueDate = dueDateObj.format('YYYY-MM-DD');
                       let taskId = task._id;
-                      Meteor.call('task.complete', formId);
-                      Meteor.call('dueDate.update', dueDate, formId);
-
+                      if (task.frequency = "0") {
+                        Meteor.call('task.remove', formId);
+                      } else {
+                        Meteor.call('task.complete', formId);
+                        Meteor.call('dueDate.update', dueDate, formId);
+                      }
                     })
                     this.props.history.push('/mgmt');
                     this.props.history.go();
