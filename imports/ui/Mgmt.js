@@ -11,7 +11,6 @@ import { UserInfoDB } from './../api/methods';
 import Banner from './Banner';
 import Login from './Login';
 import Logout from './Logout';
-import UpcomingTasks from './UpcomingTasks';
 
 const history = createHistory();
 
@@ -27,18 +26,21 @@ export default class Mgmt extends React.Component {
       tasks: [],
       currentUser: [],
       users: [],
-      assignTaskModalIsOpen: false,
+      showAssignTaskModal: false,
+      showInviteUserModal: false,
     }
   };
 
   componentDidMount() {
     document.getElementById('content').style.display = "none";
     this.infoTracker = Tracker.autorun(() => {
-      Meteor.subscribe('tasks');
+      let noUserFound = localStorage.getItem('noUserFound');
+      let taskSub = Meteor.subscribe('tasks');
       const tasks = TaskList.find().fetch();
       this.setState ({ tasks });
-      if (this.state.tasks.length !== 0) {
-        this.setState({renderTasks: true});
+      if (taskSub.ready()) {
+        document.getElementById('loader').style.display = "none";
+        document.getElementById('content').style.display = "block";
       }
       Meteor.subscribe('users');
       const users = UserInfoDB.find({}, {sort: {lastname: 1}}).fetch();
@@ -49,11 +51,23 @@ export default class Mgmt extends React.Component {
         if (!currentUser.isAdmin) {
           this.refs.createANewTask.style.display = "none";
           this.refs.createANewUser.style.display = "none";
+          this.refs.inviteAUser.style.display = "none";
           this.refs.upcomingTasks.style.display = "none";
           this.refs.completedTasks.style.display = "none";
           this.refs.workNeeded.style.display = "none";
           this.refs.assignedTasks.className = "pure-u-1 item__middle";
-        };
+        }
+        if(!!currentUser.newPrimeId) {
+          let yes = confirm("You have been invited to join " + currentUser.inviter + "'s domain.");
+          if (yes == true) {
+            let newPrimeId = currentUser.newPrimeId;
+            let willBeAdmin = currentUser.willBeAdmin;
+            Meteor.call('user.invite.accept', newPrimeId, willBeAdmin);
+            location.reload();
+          } else {
+            Meteor.call('user.invite.reject');
+          }
+        }
       });
     });
   }
@@ -87,7 +101,7 @@ export default class Mgmt extends React.Component {
     if (b.checked) {
       isAdmin = true;
     } else {
-      isAdmin = false;
+      isAdmin = "";
     }
     Meteor.call('user.create', email, password, isAdmin, firstname, lastname);
     alert("User created")
@@ -134,6 +148,48 @@ export default class Mgmt extends React.Component {
     });
   }
 
+  renderAssignedTaskModal() {
+    return <div ref="assignTaskModal" className="modal-assignTask"
+      style={{display: this.state.showAssignTaskModal ? 'block' : 'none'}}>
+      <div className="modal-content">
+        <span className="mbri-share modal_usericon"/>
+        <h2 ref="assignTaskLabel" className="modal_text">Assign this task to...</h2>
+        <form>
+          <select id="userSelect" ref="userSelect" onChange={(e) => {
+            e.preventDefault();
+          }}>
+            <option value="">Select a user</option>
+            {this.renderOptions()}
+          </select>
+          <div>
+            <button className="button__green"
+              onClick={(e) => {
+                e.preventDefault();
+                let taskId = localStorage.getItem('selectedTaskId');
+                let opt = this.refs.userSelect.options[this.refs.userSelect.selectedIndex];
+                let res = opt.text.split(" , ");
+                let firstname = res[1];
+                let lastname = res[0];
+                let assignedOn = new Date();
+                let assignedId = this.refs.userSelect.value;
+                Meteor.call('task.assign', taskId, assignedId, firstname, lastname, assignedOn);
+                this.setState({showAssignTaskModal: false});
+              }}>
+                Assign Task
+            </button>
+            <button className="button__red"
+              onClick={(e) => {
+                e.preventDefault();
+                this.setState({showAssignTaskModal: false});
+              }}>
+                Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
   renderUpcomingTasks() {
     return this.state.tasks.map((task) => {
       return this.state.currentUser.map((currentUser) => {
@@ -146,13 +202,14 @@ export default class Mgmt extends React.Component {
           taskDiv = `task-div task-comingdue`;
         }
         if (!task.assignedId && !!currentUser.isAdmin && !task.review) {
-          return <div key={task._id} ref={task._id} className={taskDiv}>
+          return <div key={task._id} ref={task._id} className={taskDiv}
+            style={{display: currentUser.isAdmin ? 'block' : 'none'}}>
             <div onClick={() => {
               localStorage.setItem("selectedTaskId", task.formId);
               history.push(`/${task.formId}`);
               history.go();
             }}>
-              <p className="task-header-upcoming">{moment(task.dueDate).format('MM-DD-YYYY')}</p>
+              <p className="task-header-upcoming">{moment(task.dueDate).format('dddd, MMM Do YYYY')}</p>
               <h3 className="task-info">
                 {task.subTask}
               </h3>
@@ -165,8 +222,9 @@ export default class Mgmt extends React.Component {
               onClick={(e) => {
                 e.preventDefault();
                 localStorage.setItem("selectedTaskId", task._id);
-                this.refs.assignTaskModal.style.display = "block";
-            }}>Assign Task</button>
+                this.setState({showAssignTaskModal: true});
+              }}
+              >Assign Task</button>
             <button className="button__green" ref="editTaskButton"
               title="Edit Task"
               onClick={(e) => {
@@ -182,46 +240,6 @@ export default class Mgmt extends React.Component {
                 localStorage.setItem("selectedTaskId", task.formId);
                 this.refs.delTaskModal.style.display = "block";
             }}>Delete Task</button>
-            {/* Assign Task modal div starts here. */}
-            <div ref="assignTaskModal" className="modal-assignTask">
-              <div className="modal-content">
-                <span className="mbri-share modal_usericon"/>
-                <h2 ref="assignTaskLabel" className="modal_text">Assign this task to...</h2>
-                <form>
-                  <select id="userSelect" ref="userSelect" onChange={(e) => {
-                    e.preventDefault();
-                  }}>
-                    <option value="">Select a user</option>
-                    {this.renderOptions()}
-                  </select>
-                  <div>
-                    <button className="button__green"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        let taskId = localStorage.getItem('selectedTaskId');
-                        let opt = this.refs.userSelect.options[this.refs.userSelect.selectedIndex];
-                        let res = opt.text.split(" , ");
-                        let firstname = res[1];
-                        let lastname = res[0];
-                        let assignedOn = new Date();
-                        let assignedId = this.refs.userSelect.value;
-                        Meteor.call('task.assign', taskId, assignedId, firstname, lastname, assignedOn);
-                        this.refs.assignTaskModal.style.display = "none";
-                      }}>
-                        Assign Task
-                    </button>
-                    <button className="button__red"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        this.refs.assignTaskModal.style.display = "none";
-                      }}>
-                        Cancel
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-            {/* Assign Task Modal ends here */}
             {/* Delete Task modal div starts here. */}
             <div ref="delTaskModal" className="modal-assignTask">
               <div className="modal-content">
@@ -268,15 +286,18 @@ export default class Mgmt extends React.Component {
           taskDiv = `task-div task-comingdue`;
         }
         if (!!currentUser.isAdmin && !!task.assignedId) {
-          return <div key={task._id} className={taskDiv}>
+          return <div key={task._id} className={taskDiv}
+            style={{display: currentUser.isAdmin ? 'block' : 'none'}}>
             <div onClick={() => {
               localStorage.setItem("selectedTaskId", task.formId);
               history.push(`/${task.formId}`);
               history.go();
             }}>
-            <p className="task-header-assigned">{moment(task.dueDate).format('MM-DD-YYYY')}</p>
+            <p className="task-header-assigned">{moment(task.dueDate).format('dddd, MMM Do YYYY')}</p>
             <h3 className="task-info">{task.subTask}</h3>
             <p className="task-info">{task.taskName}</p>
+            <p className="task-info">Assigned to: {task.firstname} {task.lastname}</p>
+            <p className="task-info">Assigned on: {moment(task.assignedOn).format('dddd, MMM Do YYYY')}</p>
           </div>
             <button className="button-assignedTask" onClick={(e) => {
               let taskId = task._id;
@@ -294,7 +315,7 @@ export default class Mgmt extends React.Component {
               history.push(`/${task.formId}`);
               history.go();
             }}>
-              <p className="task-header-assigned">{moment(task.dueDate).format('MM-DD-YYYY')}</p>
+              <p className="task-header-assigned">{moment(task.dueDate).format('dddd, MMM Do YYYY')}</p>
               <h3 className="task-info">{task.subTask}</h3>
               <p className="task-info">{task.taskName}</p>
             </div>
@@ -316,13 +337,14 @@ export default class Mgmt extends React.Component {
           taskDiv = `task-div task-comingdue`;
         }
         if (!task.assignedId && !!currentUser.isAdmin && !!task.review) {
-          return <div key={task._id} ref={task._id} className={taskDiv}>
+          return <div key={task._id} ref={task._id} className={taskDiv}
+            style={{display: currentUser.isAdmin ? 'block' : 'none'}}>
             <div onClick={() => {
               localStorage.setItem("selectedTaskId", task.formId);
               history.push(`/${task.formId}`);
               history.go();
             }}>
-              <p className="task-header-workneeded">{moment(task.dueDate).format('MM-DD-YYYY')}</p>
+              <p className="task-header-workneeded">{moment(task.dueDate).format('dddd, MMM Do YYYY')}</p>
               <h3 className="task-info">
                 {task.subTask}
               </h3>
@@ -335,63 +357,81 @@ export default class Mgmt extends React.Component {
               onClick={(e) => {
                 e.preventDefault();
                 localStorage.setItem("selectedTaskId", task._id);
-                this.refs.assignTaskModal.style.display = "block";
+                this.setState({showAssignTaskModal: true});
             }}>Assign Task</button>
-            {/* Assign Task modal div starts here. */}
-            <div ref="assignTaskModal" className="modal-assignTask">
-              <div className="modal-content">
-                <span className="mbri-share modal_usericon"/>
-                <h2 ref="assignTaskLabel" className="modal_text">Assign this task to...</h2>
-                <form>
-                  <select id="userSelect" ref="userSelect" onChange={(e) => {
-                    e.preventDefault();
-                  }}>
-                    <option value="">Select a user</option>
-                    {this.renderOptions()}
-                  </select>
-                  <div>
-                    <button className="button__green"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        let taskId = localStorage.getItem('selectedTaskId');
-                        let opt = this.refs.userSelect.options[this.refs.userSelect.selectedIndex];
-                        let res = opt.text.split(" , ");
-                        let firstname = res[1];
-                        let lastname = res[0];
-                        let assignedOn = new Date();
-                        let assignedId = this.refs.userSelect.value;
-                        Meteor.call('task.assign', taskId, assignedId, firstname, lastname, assignedOn);
-                        this.refs.assignTaskModal.style.display = "none";
-                      }}>
-                        Assign Task
-                    </button>
-                    <button className="button__red"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        this.refs.assignTaskModal.style.display = "none";
-                      }}>
-                        Cancel
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
           </div>
         };
       })
     });
   }
 
-  showContent() {
-    setTimeout(function() {
-      document.getElementById('loader').style.display = "none";
-      document.getElementById('content').style.display = "block";
-    }, 1500);
+  renderInviteUserModal() {
+    return this.state.currentUser.map((currentUser) => {
+      return <div key={currentUser._id} ref="inviteUserModal" className="modal-assignTask"
+        style={{display: this.state.showInviteUserModal ? 'block' : 'none'}}>
+        <div className="modal-content">
+          <span className="mbri-paper-plane modal_usericon"/>
+          <h2 ref="iniviteModalLabel" className="modal_text">Invite someone to your domain</h2>
+            <div>
+              <input className="modal_text" id="inviteeWillBeAdmin" type="checkbox" value="true"/>
+              <label className="modal_text">Check this box if this user will be an administrator.</label>
+            </div>
+            <div>
+              <input className="modal_text modal_input" id="inviteEmail" type="email"
+                placeholder="Please enter the user's e-mail address"/>
+              <input className="modal_text modal_input" id="confirmInviteEmail"
+                type="email" placeholder="Please confirm the user's e-mail address"/>
+            </div>
+            <div>
+              <button className="button__green"
+                onClick={(e) => {
+                  let a = document.getElementById("inviteEmail").value;
+                  let b = document.getElementById("confirmInviteEmail").value;
+                  if (a === b) {
+                    e.preventDefault();
+                    let invitee = document.getElementById("inviteEmail").value;
+                    let inviter = currentUser.firstname + " " + currentUser.lastname;
+                    let newPrimeId = currentUser.primeId;
+                    let willBeAdmin = document.getElementById("inviteeWillBeAdmin").checked;
+                    Meteor.call('user.verify', invitee, function(err, userVerified) {
+                      if (!userVerified) {
+                        alert("User not found");
+                      } else {
+                        Meteor.call('user.invite', invitee, inviter, newPrimeId, willBeAdmin);
+                        this.setState({showInviteUserModal: false});
+                        document.getElementById("inviteEmail").value = "";
+                        document.getElementById("confirmInviteEmail").value = "";
+                        document.getElementById("inviteeWillBeAdmin").checked = false;
+                      }
+                    }.bind(this));
+                  } else {
+                    e.preventDefault();
+                    alert("E-mail addresses do not match.");
+                  }
+                }}>
+                  Send
+              </button>
+              <button className="button__red"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("inviteEmail").value = '';
+                  document.getElementById("confirmInviteEmail").value = '';
+                  document.getElementById("inviteeWillBeAdmin").checked = false;
+                  this.setState({showInviteUserModal: false});
+                }}>
+                  Cancel
+              </button>
+            </div>
+        </div>
+      </div>
+    })
   }
 
   render () {
     return (
       <div className="wrapper" id="overLord">
+        {this.renderAssignedTaskModal()}
+        {this.renderInviteUserModal()}
         <div id="loader" className="loader"></div>
         <div id="content">
           {/* Sidenav starts here */}
@@ -416,6 +456,16 @@ export default class Mgmt extends React.Component {
               }>
                 Create a New User
               </a>
+              <a ref="inviteAUser" onClick={() => {
+                  document.getElementById("mySidenav").style.width = "0";
+                  document.getElementById("sidenav-button").style.left = "0";
+                  this.setState({menuStatus: ""})
+                  document.getElementById("sidenav-button-icon").className = "mbri-menu";
+                  this.setState({showInviteUserModal: true});
+                }
+              }>
+                Invite a User
+              </a>
               <a ref="logout" onClick={this.onLogout.bind(this)}>
                 Logout
               </a>
@@ -433,7 +483,7 @@ export default class Mgmt extends React.Component {
               <form onSubmit={this.onCreateUser.bind(this)} noValidate>
                 <div>
                   <input className="modal_text" type="checkbox" id="isAdminCheck"/>
-                  <label className="modal_text">Check this box if the user is an administrator</label>
+                  <label className="modal_text">Check this box if the user will be an administrator</label>
                 </div>
                 <div>
                   <input className="modal_text modal_input" type="email" ref="email"
@@ -509,7 +559,6 @@ export default class Mgmt extends React.Component {
             </div>
           </div>
         </div>
-        {this.showContent()}
       </div>
     );
   }

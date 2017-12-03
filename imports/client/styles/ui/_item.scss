@@ -9,6 +9,10 @@
 .item-icon {
   color: #ffffff;
 }
+.item-date {
+  margin: 5px 0 0 5px;
+  text-align: center;
+}
 .item__top {
   background: #ffffff;
   font-size: 3rem;
@@ -27,7 +31,6 @@
 }
 .item__left {
   background: #ffffff;
-  margin-top: .5rem;
   text-align: center;
 }
 .item--left--label {
@@ -41,10 +44,10 @@
   margin-bottom: .75rem;
 }
 .item--textbox {
-  margin: 0 .5rem 0 .5rem;
+  margin: 5px;
   padding: .5rem 0 .5rem 0;
   text-align: center;
-  width: 95%;
+  width: 50%;
 }
 .item-select {
   color: #000000;
@@ -56,8 +59,7 @@
 }
 .item__right {
   background: #ffffff;
-  margin-top: .5rem;
-  text-align: center;
+text-align: center;
 }
 .item--right--color {
   background: #a86428;
@@ -66,7 +68,6 @@
 }
 .item__middle {
   background: #ffffff;
-  // margin: .5rem auto 0 auto;
   text-align: center;
 }
 .item--middle--color {
@@ -166,6 +167,24 @@
 }
 .item-hidden {
   visibility: hidden;
+}
+.item-jha-header {
+  background: rgba(229,189,0,1);
+  color: #000000;
+  font-size: 3rem;
+  font-weight: 400;
+  padding-bottom: 10px;
+  text-align: center;
+  width: 100%;
+}
+.item-jha-task-info {
+  background: rgba(229,189,0,.75);
+  color: #000000;
+  font-size: 2.25rem;
+  font-weight: 400;
+  padding-bottom: 10px;
+  text-align: center;
+  width: 100%;
 }
 .mbri-clock {
   font-size:3rem;

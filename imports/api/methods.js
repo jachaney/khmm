@@ -2,7 +2,6 @@ import { Accounts } from 'meteor/accounts-base';
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import moment from 'moment';
-import shortid from 'shortid';
 import SimpleSchema from 'simpl-schema';
 import { Session } from 'meteor/session';
 import { Random } from 'meteor/random';
@@ -11,46 +10,55 @@ export const UserInfoDB = new Mongo.Collection('userinfo');
 export const TaskList = new Mongo.Collection('tasks');
 export const RemItems = new Mongo.Collection('remitems');
 export const WorkItems = new Mongo.Collection('workitems');
-export const Notes = new Mongo.Collection('notes');
+export const JHAForms = new Mongo.Collection('jhaforms');
+export const JHAItems = new Mongo.Collection('jhaitems');
+export const JHASOWs = new Mongo.Collection('jhasows');
 
-  if (Meteor.isServer) {
-    Meteor.publish('tasks', function() {
-      if (!!Meteor.user().profile.isAdmin) {
-        return TaskList.find({ $or: [{primeId: Meteor.user().profile.primeId},{assignedId: this.userId }]},{sort:{dueDate: 1} });
-      } else {
-        return TaskList.find({assignedId: this.userId},{sort:{dueDate: 1}});
-      }
-    });
-    Meteor.publish('userinfo', function() {
-      return UserInfoDB.find ({$or: [{_id: this.userId },{userId: this.userId}] });
-    });
-    Meteor.publish('workitems', function() {
-      return WorkItems.find ({primeId: Meteor.user().profile.primeId});
-    });
-    Meteor.publish('remitems', function() {
-      return RemItems.find ({primeId: Meteor.user().profile.primeId});
-    });
-    Meteor.publish('notes', function() {
-      return Notes.find({primeId: Meteor.user().profile.primeId});
-    });
-    Meteor.publish('users', function() {
-      return UserInfoDB.find ({primeId: Meteor.user().profile.primeId});
-    });
-    Meteor.publish('defaultTasks', function() {
-      return TaskList.find ({primeId: "defaultTask"});
-    });
-    Meteor.publish('defaultNotes', function() {
-      return Notes.find ({primeId: "defaultTask"});
-    });
-    Meteor.publish('defaultRemItems', function() {
-      return RemItems.find ({primeId: "defaultTask"});
-    });
-    Meteor.publish('defaultWorkItems', function() {
-      return WorkItems.find ({primeId: "defaultTask"});
-    });
-  }
+if (Meteor.isServer) {
+  Meteor.publish('tasks', function() {
+    if (!!Meteor.user().profile.isAdmin) {
+      return TaskList.find({ $or: [{primeId: Meteor.user().profile.primeId},{assignedId: this.userId }]},{sort:{dueDate: 1} });
+    } else {
+      return TaskList.find({assignedId: this.userId},{sort:{dueDate: 1}});
+    }
+  });
+  Meteor.publish('userinfo', function() {
+    return UserInfoDB.find ({$or: [{_id: this.userId },{userId: this.userId}] });
+  });
+  Meteor.publish('workitems', function() {
+    return WorkItems.find ({primeId: Meteor.user().profile.primeId});
+  });
+  Meteor.publish('remitems', function() {
+    return RemItems.find ({primeId: Meteor.user().profile.primeId});
+  });
+  Meteor.publish('users', function() {
+    return UserInfoDB.find ({primeId: Meteor.user().profile.primeId});
+  });
+  Meteor.publish('defaultTasks', function() {
+    return TaskList.find ({primeId: "defaultTask"});
+  });
+  Meteor.publish('defaultRemItems', function() {
+    return RemItems.find ({primeId: "defaultTask"});
+  });
+  Meteor.publish('defaultWorkItems', function() {
+    return WorkItems.find ({primeId: "defaultTask"});
+  });
+  Meteor.publish('JHAItems', function() {
+    return JHAItems.find ({primeId: Meteor.user().profile.primeId});
+  });
+  Meteor.publish('JHAForms', function() {
+    return JHAForms.find ({primeId: Meteor.user().profile.primeId});
+  });
+  Meteor.publish('JHASows', function() {
+    return JHASOWs.find ({primeId: Meteor.user().profile.primeId});
+  });
+  Meteor.publish('defaultJHAItems', function() {
+    return JHAItems.find ({primeId: "default"});
+  });
+}
 
 Meteor.methods({
+// Task methods begin here
   'task.new'(newId) {
       if (!this.userId) {
         throw new Meteor.Error('Unauthorized access');
@@ -127,7 +135,7 @@ Meteor.methods({
       item.formId = formId;
       RemItems.insert(item);
     })
-    WorkItems.find({formId: val}).forEach( function(item) {
+    WorkItems.find({formId: val}).forEach(function(item) {
       item._id = Random.id();
       item.primeId = Meteor.user().profile.primeId;
       item.formId = formId;
@@ -238,14 +246,15 @@ Meteor.methods({
       }
     },{upsert: true});
   },
+  // workItem methods begin here
   'workItem.add' ( formId ) {
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
     }
     WorkItems.insert({
       formId,
-      labelId: shortid.generate(),
-      subTitleId: shortid.generate(),
+      labelId: Random.id(),
+      subTitleId: Random.id(),
       checked: false,
       primeId: Meteor.user().profile.primeId,
       createdOn: new Date()
@@ -287,6 +296,7 @@ Meteor.methods({
     }
     WorkItems.remove({ _id });
   },
+  // remItem methods begin here
   'remItem.add' (formId) {
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
@@ -324,17 +334,7 @@ Meteor.methods({
     }
     RemItems.remove({ _id });
   },
-
-  'note.add' (content, formId) {
-    if (!this.userId) {
-      throw new Meteor.Error('Unauthorized access');
-    }
-    Notes.insert({
-      content,
-      formId,
-      createdOn: new Date()
-    })
-  },
+// User account methods begin here
   'userinfo.insert' ( email, firstname, lastname ) {
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
@@ -374,8 +374,7 @@ Meteor.methods({
           firstname,
           lastname
         }
-      },
-      {upsert: true});
+      },{upsert: true});
   },
   'user.create' (email, password, isAdmin, firstname, lastname) {
     if (!this.userId) {
@@ -397,5 +396,149 @@ Meteor.methods({
       primeId: Meteor.user().profile.primeId,
       isAdmin
     })
+  },
+  'user.verify'(invitee) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    let foundUser = UserInfoDB.find({email: invitee}).fetch();
+    if (foundUser.length) {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  'user.invite'(invitee, inviter, newPrimeId, willBeAdmin) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    UserInfoDB.update({email: invitee},{
+      $set: {
+        newPrimeId,
+        inviter,
+        willBeAdmin
+      }
+    },{upsert: true})
+  },
+  'user.invite.accept'(newPrimeId, willBeAdmin) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    UserInfoDB.update({userId: this.userId},{
+      $set: {
+        primeId: newPrimeId,
+        inviter: "",
+        isAdmin: willBeAdmin,
+        newPrimeId: "",
+        willBeAdmin: "",
+      }
+    },{upsert: true})
+    Meteor.users.update({_id: this.userId},{
+      $set: {
+        profile: {
+          primeId: newPrimeId,
+          isAdmin: willBeAdmin,
+        }
+      }
+    },{upsert: true})
+  },
+  'user.invite.reject'() {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    UserInfoDB.update({userId: this.userId},{
+      $set: {
+        newPrimeId: "",
+        inviter: "",
+        willBeAdmin: "",
+      }
+    },{upsert: true})
+  },
+// Job Hazard Analysis methods begin there
+  'jhaForm.update' (formId,location,scheduledDate,preparedBy,preparedDate,reviewedBy,reviewedDate) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    JHAForms.update({formId},
+      {$set: {
+          location,
+          scheduledDate,
+          preparedBy,
+          preparedDate,
+          reviewedBy,
+          reviewedDate,
+          primeId: Meteor.user().profile.primeId
+        }
+      },
+    {upsert: true});
+  },
+  'jhaSOW.add' (formId, type) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    JHASOWs.insert({
+      type,
+      formId,
+      sowId: Random.id(),
+      hazId: Random.id(),
+      controlId: Random.id(),
+      primeId: Meteor.user().profile.primeId,
+      createdOn: new Date(),
+    })
+  },
+  'jhaSOW.update' (_id, sow, hazards, controls) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    JHASOWs.update({_id},
+      {$set: {
+        sow,
+        hazards,
+        controls,
+      }
+    },{upsert: true});
+  },
+  'jhaSOW.remove' (_id) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    JHASOWs.remove({ _id });
+  },
+  'jhaItems.populate' (formId) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    JHAItems.find({formId: "default"},{$sort:{_id: 1}}).forEach(function(item) {
+      item._id = Random.id();
+      item.primeId = Meteor.user().profile.primeId;
+      item.formId = formId;
+      item.createdOn = new Date();
+      item.subHeadingId = Random.id();
+      item.textId = Random.id();
+      JHAItems.insert(item);
+    })
+  },
+  'jhaItems.add' (formId, subHeading, text) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    JHAItems.insert({
+      formId,
+      primeId: Meteor.user().profile.primeId,
+      checked: false,
+      createdOn: new Date(),
+      subHeading,
+      text
+    })
+  },
+  'jhaItem.check' (_id, checked) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    JHAItems.update({ _id },
+      {$set: {
+        checked
+      }
+    },{upsert: true});
   },
 });

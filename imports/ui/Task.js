@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import React from 'react';
 import createHistory from 'history/createBrowserHistory';
+import { BrowserRouter as Router, Route, Switch, Link, Redirect } from 'react-router-dom';
 import { Tracker } from 'meteor/tracker';
 import { Session } from 'meteor/session';
 import shortid from 'shortid';
@@ -13,7 +14,7 @@ import { TaskList } from './../api/methods';
 import { WorkItems } from './../api/methods';
 
 const history = createHistory();
-let formId = localStorage.getItem('selectedTaskId');
+const formId = localStorage.getItem('selectedTaskId');
 Session.set('checked', 0);
 
 export default class WorkTask extends React.Component {
@@ -31,9 +32,6 @@ export default class WorkTask extends React.Component {
   componentDidMount() {
     document.getElementById('content').style.display = "none";
     this.formTracker = Tracker.autorun(() => {
-      Meteor.subscribe('notes');
-      const notes = Notes.find({formId}).fetch();
-      this.setState({ notes });
       Meteor.subscribe('remitems');
       const remItems = RemItems.find({formId}).fetch();
       this.setState({ remItems });
@@ -45,7 +43,7 @@ export default class WorkTask extends React.Component {
       this.setState({ workItems });
       this.state.tasks.map((task) => {
         if (!!task.assignedOn) {
-          this.refs.assignedOn.innerHTML = `${moment(task.assignedOn).format('MM-DD-YYYY')}`;
+          this.refs.assignedOn.innerHTML = `${moment(task.assignedOn).format('dddd, MMM Do YYYY')}`;
         } else {
           this.refs.assignedOn.innerHTML = "Unassigned";
         }
@@ -62,14 +60,14 @@ export default class WorkTask extends React.Component {
         this.refs.primeTask.innerHTML = task.taskName;
         this.refs.subTask.innerHTML = `Task: ${task.subTask}`;
         this.refs.instructions.innerHTML = task.instructions;
-        this.refs.dueDate.innerHTML = `<strong>Due Date:</strong><br/>${moment(task.dueDate).format('MM-DD-YYYY')}`;
+        this.refs.dueDate.innerHTML = `<strong>Due Date:</strong><br/>${moment(task.dueDate).format('dddd, MMM Do YYYY')}`;
         if (task.frequency === "1") {
           this.refs.frequency.innerHTML = `<strong>Frequency:</strong><br/>${task.frequency} month`;
         } else {
           this.refs.frequency.innerHTML = `<strong>Frequency:</strong><br/>${task.frequency} months`;
         }
         this.refs.createdBy.innerHTML = `<strong>Task Version Created By:</strong><br/>${task.createdBy}`;
-        this.refs.createdDate.innerHTML = `<strong>Version Created Date:</strong><br/>${moment(task.createdDate).format('MM-DD-YYYY')}`;
+        this.refs.createdDate.innerHTML = `<strong>Version Created Date:</strong><br/>${moment(task.createdOn).format('dddd, MMM Do YYYY')}`;
         if (!!task.reminder) {
           this.refs.reminder.innerHTML = task.reminder;
         } else {
@@ -90,7 +88,6 @@ export default class WorkTask extends React.Component {
   }
 
   componentWillUnmount() {
-    localStorage.removeItem('selectedTaskId');
     this.formTracker.stop();
   }
 
@@ -203,6 +200,11 @@ export default class WorkTask extends React.Component {
                     onChange={this.saveAssistedBy.bind(this)}/>
                 </div>
               </div>
+              <div className="pure-u-1 item">
+                <Link to="/jha">
+                  Click here to view the Job Hazard Analysis for this task
+                </Link>
+              </div>
               <div id="reminder" className="pure-u-1 item">
                 <h3>Reminder:</h3>
                 <p ref="reminder"/>
@@ -229,35 +231,33 @@ export default class WorkTask extends React.Component {
                   Home
                 </button>
                 <button className="button__green" onClick={(e) => {
-                  let c = $('input[type=checkbox]:checked').length;
-                  let b = document.taskOptions.checkbox.length;
-                  if (c === b && !this.refs.notes.value) {
-                    e.preventDefault();
-                    this.state.tasks.map((task) => {
-                      let dueDateObj = moment(task.dueDate).add(task.frequency, 'months');
-                      let dueDate = dueDateObj.format('YYYY-MM-DD');
-                      let taskId = task._id;
-                      if (task.frequency = "0") {
-                        Meteor.call('task.remove', formId);
-                      } else {
-                        Meteor.call('task.complete', formId);
-                        Meteor.call('dueDate.update', dueDate, formId);
-                      }
-                    })
-                    this.props.history.push('/mgmt');
-                    this.props.history.go();
-                  } else if (c === b && !!this.refs.notes.value) {
-                    e.preventDefault();
-                    this.state.tasks.map((task) => {
+                  this.state.tasks.map((task) => {
+                    let c = $('input[type=checkbox]:checked').length;
+                    let b = document.taskOptions.checkbox.length;
+                    let dueDateObj = moment(task.dueDate).add(task.frequency, 'months');
+                    let dueDate = dueDateObj.format('YYYY-MM-DD');
+                    let taskId = task._id;
+                    if (c != b) {
+                      e.preventDefault();
+                      return alert('Please complete all tasks before completing the work order');
+                    } else if (c === b && !!this.refs.notes.value) {
+                      e.preventDefault();
                       console.log("additional work is needed");
                       Meteor.call('task.workneeded', formId);
-                    })
-                    this.props.history.push('/mgmt');
-                    this.props.history.go();
-                  } else {
-                    e.preventDefault();
-                    return alert('Please complete all tasks before completing the work order');
-                  }
+                      this.props.history.push('/mgmt');
+                      this.props.history.go();
+                    } else if (task.frequency === "0") {
+                      Meteor.call('task.remove', formId);
+                      this.props.history.push('/mgmt');
+                      this.props.history.go();
+                    } else if (c === b && !this.refs.notes.value) {
+                      e.preventDefault();
+                      Meteor.call('task.complete', formId);
+                      Meteor.call('dueDate.update', dueDate, formId);
+                      this.props.history.push('/mgmt');
+                      this.props.history.go();
+                    }
+                  })
                 }}>
                   Complete Task
                 </button>

@@ -25,7 +25,6 @@ export default class NewTask extends React.Component {
       workItems: [],
       defaultTasks: [],
       defaultWorkItems: [],
-      defaultNotes: [],
       defaultRemItems: []
     };
   }
@@ -35,9 +34,6 @@ export default class NewTask extends React.Component {
     let newId = Session.get('formId');
     Meteor.call('task.new', newId);
     this.formTracker = Tracker.autorun(() => {
-      Meteor.subscribe('notes');
-      const notes = Notes.find().fetch();
-      this.setState({ notes });
       Meteor.subscribe('remitems');
       const remItems = RemItems.find({formId: newId}).fetch();
       this.setState({ remItems });
@@ -81,9 +77,6 @@ export default class NewTask extends React.Component {
       Meteor.subscribe('defaultWorkItems');
       const defaultWorkItems = WorkItems.find({primeId: "defaultTask"}).fetch();
       this.setState({ defaultWorkItems });
-      Meteor.subscribe('defaultNotes');
-      const defaultNotes = Notes.find({primeId: "defaultTask"}).fetch();
-      this.setState({ defaultNotes });
     });
   }
 

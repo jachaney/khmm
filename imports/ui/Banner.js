@@ -1,7 +1,4 @@
 import React from 'react';
-import createHistory from 'history/createBrowserHistory';
-
-const history = createHistory();
 
 export default class Banner extends React.Component {
 
