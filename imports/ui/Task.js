@@ -230,22 +230,27 @@ export default class WorkTask extends React.Component {
                 </button>
                 <button className="button__green" onClick={(e) => {
                   this.state.tasks.map((task) => {
-                    let c = $('input[type=checkbox]:checked').length;
-                    let b = document.taskOptions.checkbox.length;
+                    try {
+                      let b = document.taskOptions.checkbox.length;
+                      let c = $('input[type=checkbox]:checked').length;
+                    }
+                    catch(err) {
+                      b = 0;
+                      c = 0;
+                    }
                     let dueDateObj = moment(task.dueDate).add(task.frequency, 'months');
                     let dueDate = dueDateObj.format('YYYY-MM-DD');
                     let taskId = task._id;
                     if (c != b) {
                       e.preventDefault();
                       return alert('Please complete all tasks before completing the work order');
-                    } else if (c === b && !!this.refs.notes.value) {
-                      e.preventDefault();
-                      console.log("additional work is needed");
-                      Meteor.call('task.workneeded', formId);
-                      this.props.history.push('/mgmt');
-                      this.props.history.go();
                     } else if (task.frequency === "0") {
                       Meteor.call('task.remove', formId);
+                      this.props.history.push('/mgmt');
+                      this.props.history.go();
+                    } else if (c === b && !!this.refs.notes.value) {
+                      e.preventDefault();
+                      Meteor.call('task.workneeded', formId);
                       this.props.history.push('/mgmt');
                       this.props.history.go();
                     } else if (c === b && !this.refs.notes.value) {
