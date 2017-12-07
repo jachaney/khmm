@@ -28,11 +28,12 @@ export default class jha extends React.Component {
   }
 
   componentDidMount() {
+    document.getElementById('content').style.display = "none";
     this.JHATracker = Tracker.autorun(() => {
-      Meteor.subscribe('tasks');
+      let tasksSub = Meteor.subscribe('tasks');
       const tasks = TaskList.find({ formId }).fetch();
       this.setState({ tasks });
-      Meteor.subscribe('JHASows');
+      let jhaSowsSub = Meteor.subscribe('JHASows');
       const SOWs = JHASOWs.find({ formId }).fetch();
       this.setState({ SOWs });
       let formsSub = Meteor.subscribe('JHAForms');
@@ -41,7 +42,9 @@ export default class jha extends React.Component {
       let itemsSub = Meteor.subscribe('JHAItems');
       const items = JHAItems.find({ formId }).fetch();
       this.setState({ items });
-      if (itemsSub.ready()) {
+      if (itemsSub.ready() && tasksSub.ready() && jhaSowsSub.ready() && formsSub.ready()) {
+        document.getElementById('content').style.display = "block";
+        document.getElementById('loader').style.display = "none";
         if (this.state.items.length == 0) {
           console.log ("populating list now...");
           Meteor.call('jhaItems.populate', formId);
@@ -69,6 +72,17 @@ export default class jha extends React.Component {
           document.getElementById("jhaReviewedDate").value = form.reviewedDate;
         }
       })
+      this.state.SOWs.map((sow) => {
+        if (!!sow.sowValue) {
+          document.getElementById(`${sow.sowId}`).value = sow.sowValue;
+        }
+        if (!!sow.hazValue) {
+          document.getElementById(`${sow.hazId}`).value = sow.hazValue;
+        }
+        if (!!sow.controlValue) {
+          document.getElementById(`${sow.controlId}`).value = sow.controlValue;
+        }
+      })
     })
   }
 
@@ -85,18 +99,41 @@ export default class jha extends React.Component {
     Meteor.call('jhaSOW.add',formId);
   }
 
+  updateSOW(event) {
+    return this.state.SOWs.map((sow) => {
+      let _id = sow._id;
+      let sowValue = document.getElementById(`${sow.sowId}`).value;
+      let hazValue = document.getElementById(`${sow.hazId}`).value;
+      let controlValue = document.getElementById(`${sow.controlId}`).value;
+      Meteor.call('jhaSOW.update', _id, sowValue, hazValue, controlValue);
+    })
+  }
+
   renderSOWs() {
     return this.state.SOWs.map((sow) => {
       return <div key={sow._id} id={sow._id}>
-        <div id={sow.sowId} className="pure-u pure-u-sm-1-3">
-          <textarea id={sow.sowId}/>
+        <div className="pure-u pure-u-sm-1-3">
+          <textarea className="item-sow-textbox" id={sow.sowId}
+            onChange={(e) => {
+              e.preventDefault();
+              this.updateSOW();
+            }}/>
         </div>
         <div className="pure-u pure-u-sm-1-3">
-          <textarea id={sow.hazId}/>
+          <textarea className="item-sow-textbox" id={sow.hazId}
+            onChange={(e) => {
+              e.preventDefault();
+              this.updateSOW();
+            }}/>
         </div>
         <div className="pure-u pure-u-sm-1-3">
-          <textarea id={sow.controlId}/>
-          <button className="button-deleteItem" title="Delete this sequence"
+          <textarea className="item-sow-textbox item-sow-textbox-with-delete"
+            id={sow.controlId}
+            onChange={(e) => {
+              e.preventDefault();
+              this.updateSOW();
+            }}/>
+          <button className="button-sow-delete-item" title="Delete this sequence"
             onClick={(e) => {
               e.preventDefault();
               let _id = sow._id;
@@ -161,7 +198,8 @@ export default class jha extends React.Component {
     return this.state.items.map((item) => {
       let isChecked = item.checked;
       return <div key={item._id}>
-        <label className="pure-u-1 item--checkbox--padding" ref={item.subHeadingId} id={item.subHeadingId}>
+        <label className="pure-u-1 item--checkbox--padding" ref={item.subHeadingId} id={item.subHeadingId}
+          style={{display: item.subHeading ? 'block' : 'none'}}>
           <strong>{item.subHeading}</strong>
         </label>
         <input type="checkbox" className="pure-u-1-24 item--checkbox--padding" name="checkbox" ref={item._id}
@@ -183,52 +221,55 @@ export default class jha extends React.Component {
   render() {
     return (
       <div id="wrapper" className="wrapper">
-        <form name="jhaItems" id="primeForm"
-          onSubmit={this.goCancel.bind(this)}>
-          <div className="item-jha-header">
-            <h2>Congregation Job Hazard Analysis</h2>
-            <p>Please read the <i><a href="/DC-85i.pdf">
-                Congregation Job Hazard Analysis Instructions (DC-85i)
-              </a></i> carefully before completing this report.
-            </p>
-          </div>
-          <div className="pure-g item-background">
-            <div className="pure-u-1 item-jha-task-info">
-              {this.renderTaskInfo()}
+        <div id="loader" className="loader"></div>
+        <div id="content">
+          <form name="jhaItems" id="primeForm"
+            onSubmit={this.goCancel.bind(this)}>
+            <div className="item-jha-header">
+              <h2>Congregation Job Hazard Analysis</h2>
+              <p>Please read the <i><a href="/DC-85i.pdf">
+                  Congregation Job Hazard Analysis Instructions (DC-85i)
+                </a></i> carefully before completing this report.
+              </p>
             </div>
-            <div className="pure-u-1 pure-u-sm-1-3 item__middle">
-              <p>Sequence of Work</p>
+            <div className="pure-g item-background">
+              <div className="pure-u-1 item-jha-task-info">
+                {this.renderTaskInfo()}
+              </div>
+              <div className="pure-u-1 pure-u-sm-1-3 item-sow-label">
+                <h3>Sequence of Work</h3>
+              </div>
+              <div className="pure-u-1 pure-u-sm-1-3 item-sow-label">
+                <h3>Potential Hazards</h3>
+              </div>
+              <div className="pure-u-1 pure-u-sm-1-3 item-sow-label">
+                <h3>Method for Eliminating or Controlling and Person Responsible</h3>
+              </div>
+              <div className="pure-u-1" id="sowContainer">
+                {this.renderSOWs()}
+              </div>
+              <div className="pure-u-1 item__middle">
+                <button ref="addSOW" className="button__grey"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    let type = "textarea";
+                    Meteor.call('jhaSOW.add', formId, type);
+                  }}>
+                    Add a Sequence of Work
+                </button>
+              </div>
+              <div className="pure-u-1 item">
+                {this.renderJHAItems()}
+              </div>
+              <div className="pure-u-1 item__middle">
+                <button ref="backButton" type="submit"
+                  className="button__grey">
+                  Go Back to the Task
+                </button>
+              </div>
             </div>
-            <div className="pure-u-1 pure-u-sm-1-3 item__middle">
-              <p>Potential Hazards</p>
-            </div>
-            <div className="pure-u-1 pure-u-sm-1-3 item__middle">
-              <p>Method for Eliminating or Controlling and Person Responsible</p>
-            </div>
-            <div className="pure-u-1" id="sowContainer">
-              {this.renderSOWs()}
-            </div>
-            <div className="pure-u-1 item__middle">
-              <button ref="addSOW" className="button__grey"
-                onClick={(e) => {
-                  e.preventDefault();
-                  let type = "textarea";
-                  Meteor.call('jhaSOW.add', formId, type);
-                }}>
-                  Add a Sequence of Work
-              </button>
-            </div>
-            <div>
-              {this.renderJHAItems()}
-            </div>
-            <div className="pure-u-1 item__middle">
-              <button ref="backButton" type="submit"
-                className="button__grey">
-                Go Back
-              </button>
-            </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     )
   };

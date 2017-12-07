@@ -32,13 +32,13 @@ export default class WorkTask extends React.Component {
   componentDidMount() {
     document.getElementById('content').style.display = "none";
     this.formTracker = Tracker.autorun(() => {
-      Meteor.subscribe('remitems');
+      let remItemsSub = Meteor.subscribe('remitems');
       const remItems = RemItems.find({formId}).fetch();
       this.setState({ remItems });
-      Meteor.subscribe('tasks');
+      let tasksSub = Meteor.subscribe('tasks');
       const tasks = TaskList.find({formId}).fetch();
       this.setState({ tasks });
-      Meteor.subscribe('workitems');
+      let workItemsSub = Meteor.subscribe('workitems');
       const workItems = WorkItems.find({formId}).fetch();
       this.setState({ workItems });
       this.state.tasks.map((task) => {
@@ -84,6 +84,10 @@ export default class WorkTask extends React.Component {
           this.refs.assistedBy.value = "";
         }
       })
+      if (remItemsSub.ready() && tasksSub.ready() && workItemsSub.ready()) {
+        document.getElementById('content').style.display = "block";
+        document.getElementById('loader').style.display = "none";
+      }
     });
   }
 
@@ -123,7 +127,8 @@ export default class WorkTask extends React.Component {
     return this.state.workItems.map((workItem) => {
       let isChecked = workItem.checked;
       return <div key={workItem._id}>
-        <label className="pure-u-1 item--checkbox--padding" ref={workItem.subTitleId} id={workItem.subTitleId}>
+        <label className="pure-u-1 item--checkbox--padding" ref={workItem.subTitleId} id={workItem.subTitleId}
+          style={{display: workItem.subTitle ? 'block' : 'none'}}>
           <strong>{workItem.subTitle}</strong>
         </label>
         <input type="checkbox" className="pure-u-1-24 item--checkbox--padding" name="checkbox" ref={workItem._id}
@@ -150,13 +155,6 @@ export default class WorkTask extends React.Component {
   saveNotes() {
     let notes = this.refs.notes.value;
     Meteor.call('notes.update', notes, formId);
-  }
-
-  showContent() {
-    setTimeout(function() {
-      document.getElementById('loader').style.display = "none";
-      document.getElementById('content').style.display = "block";
-    }, 1500);
   }
 
   render() {
@@ -265,7 +263,6 @@ export default class WorkTask extends React.Component {
             </div>
           </form>
         </div>
-        {this.showContent()}
       </div>
     )
   }

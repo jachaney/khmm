@@ -79,6 +79,9 @@ Meteor.methods({
     TaskList.remove({formId});
     WorkItems.remove({formId});
     RemItems.remove({formId});
+    JHAForms.remove({formId});
+    JHASOWs.remove({formId});
+    JHAItems.remove({formId});
   },
   'task.assign' (taskId, assignedId, firstname, lastname, assignedOn) {
     if (!this.userId) {
@@ -486,15 +489,15 @@ Meteor.methods({
       createdOn: new Date(),
     })
   },
-  'jhaSOW.update' (_id, sow, hazards, controls) {
+  'jhaSOW.update' (_id, sowValue, hazValue, controlValue) {
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
     }
     JHASOWs.update({_id},
       {$set: {
-        sow,
-        hazards,
-        controls,
+        sowValue,
+        hazValue,
+        controlValue,
       }
     },{upsert: true});
   },

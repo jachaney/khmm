@@ -38,11 +38,7 @@ export default class Mgmt extends React.Component {
       let taskSub = Meteor.subscribe('tasks');
       const tasks = TaskList.find().fetch();
       this.setState ({ tasks });
-      if (taskSub.ready()) {
-        document.getElementById('loader').style.display = "none";
-        document.getElementById('content').style.display = "block";
-      }
-      Meteor.subscribe('users');
+      let userSub = Meteor.subscribe('users');
       const users = UserInfoDB.find({}, {sort: {lastname: 1}}).fetch();
       this.setState({ users });
       const currentUser = UserInfoDB.find({userId: Meteor.userId()}).fetch();
@@ -69,6 +65,10 @@ export default class Mgmt extends React.Component {
           }
         }
       });
+      if (taskSub.ready() && userSub.ready()) {
+        document.getElementById('loader').style.display = "none";
+        document.getElementById('content').style.display = "block";
+      }
     });
   }
 

@@ -195,6 +195,30 @@
     background: rgba(189, 45, 45, 1);
   }
 }
+.button-sow-delete-item {
+  background: transparent;
+  border:1px solid #555555;
+  color: #555555;
+  cursor: default;
+  font-weight: 600;
+  height: 63px;
+  margin: 0 .5rem 0 .5rem;
+  line-height: 1.25em;
+  outline-color: none;
+  padding: .75rem;
+  transition: background .2s ease, transform .2s ease;
+  vertical-align: top;
+
+  &:hover, &:focus {
+    color: #ffffff;
+    background: rgba(189, 45, 45, .75);
+  }
+
+  &:active {
+    color: #ffffff;
+    background: rgba(189, 45, 45, 1);
+  }
+}
 
 .button__menu {
   background: rgba(29, 39, 49, .95);
