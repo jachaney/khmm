@@ -65,11 +65,12 @@ Meteor.methods({
       }
         TaskList.insert({
           assignedId: '',
+          completed: '',
           createdBy: Meteor.user().emails[0].address,
+          createdOn: new Date(),
           frequency: "1",
           formId: newId,
           primeId: Meteor.user().profile.primeId,
-          createdOn: new Date()
         });
   },
   'task.remove'(formId) {
@@ -96,31 +97,54 @@ Meteor.methods({
       }},
       {upsert: true});
   },
-  'task.complete' (formId) {
+  'task.complete' (formId, dueDate) {
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
     }
+    let newFormId = Random.id();
+    TaskList.find({formId}).forEach(function(task) {
+      task._id = Random.id();
+      task.assignedOn = "";
+      task.assignedId = "";
+      task.assistedBy = "";
+      task.completed = "";
+      task.completedOn = "";
+      task.dueDate = dueDate;
+      task.formId = newFormId;
+      task.firstname = "";
+      task.lastname = "";
+      task.review = "";
+      TaskList.insert(task);
+    })
     TaskList.update({formId},
       {$set: {
-          assistedBy: "",
-          firstname: "",
-          lastname: "",
-          assignedOn: "",
-          assignedId: "",
-          review: ""
+          completed: true,
+          completedOn: moment().format('YYYY-MM-DD'),
+          review: "",
         }
-      }
-    )
-    WorkItems.update({formId},
-    {$set: {
-      checked: false
-      }
-    },{multi: true});
-    RemItems.update({formId},
-    {$set: {
-      checked: false
-      }
-    },{multi: true});
+      },{upsert: true})
+    WorkItems.find({formId}).forEach(function(workItem) {
+      workItem._id = Random.id();
+      workItem.checked = "";
+      workItem.formId = newFormId;
+      WorkItems.insert(workItem);
+    })
+    // WorkItems.update({formId},
+    // {$set: {
+    //   checked: false
+    //   }
+    // },{multi: true});
+    RemItems.find({formId}).forEach(function(remItem) {
+      remItem._id = Random.id();
+      remItem.checked = false;
+      remItem.formId = newFormId;
+      RemItems.insert(remItem);
+    })
+    // RemItems.update({formId},
+    // {$set: {
+    //   checked: false
+    //   }
+    // },{multi: true});
   },
   'task.selectDefault'(formId, val) {
     if (!this.userId) {
@@ -239,13 +263,14 @@ Meteor.methods({
       }
     },{upsert: true});
   },
-  'notes.update' (notes, formId) {
+  'notes.update' (notes, formId, review) {
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
     }
     TaskList.update({ formId: formId },
       {$set: {
-        notes
+        notes,
+        review
       }
     },{upsert: true});
   },

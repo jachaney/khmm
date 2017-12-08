@@ -22,6 +22,7 @@ export default class WorkTask extends React.Component {
     super(props);
     this.state = {
       funcBut: false,
+      isCompleted: '',
       notes: [],
       remItems: [],
       tasks:[],
@@ -42,6 +43,9 @@ export default class WorkTask extends React.Component {
       const workItems = WorkItems.find({formId}).fetch();
       this.setState({ workItems });
       this.state.tasks.map((task) => {
+        if (!!task.completed) {
+          this.setState({isCompleted: true});
+        }
         if (!!task.assignedOn) {
           this.refs.assignedOn.innerHTML = `${moment(task.assignedOn).format('dddd, MMM Do YYYY')}`;
         } else {
@@ -108,6 +112,7 @@ export default class WorkTask extends React.Component {
       return <div name="checkboxes" key={remItem._id} className="item--checkbox--padding">
         <input className="pure-u-1-24 item--checkbox--padding" type="checkbox"
           ref={remItem._id} name="checkbox" value="1" id={remItem._id}
+          disabled={this.state.isCompleted ? 'true' : null}
           checked={isChecked}
           onChange={(e) => {
             e.preventDefault();
@@ -133,6 +138,7 @@ export default class WorkTask extends React.Component {
         </label>
         <input type="checkbox" className="pure-u-1-24 item--checkbox--padding" name="checkbox" ref={workItem._id}
           id={workItem._id} checked={isChecked}
+          disabled={this.state.isCompleted ? 'true' : null}
           onChange={(e) => {
             e.preventDefault();
             let _id = workItem._id;
@@ -154,7 +160,12 @@ export default class WorkTask extends React.Component {
 
   saveNotes() {
     let notes = this.refs.notes.value;
-    Meteor.call('notes.update', notes, formId);
+    if (!this.refs.notes.value) {
+      review = false;
+    } else {
+      review = true;
+    }
+    Meteor.call('notes.update', notes, formId, review);
   }
 
   render() {
@@ -195,6 +206,7 @@ export default class WorkTask extends React.Component {
                 <div className="pure-u-1 pure-u-sm-1-6 item">
                   <p><strong>Assisted By:</strong></p>
                   <input type="text" ref="assistedBy" id="assistedBy"
+                    disabled={this.state.isCompleted ? 'true' : null}
                     onChange={this.saveAssistedBy.bind(this)}/>
                 </div>
               </div>
@@ -228,39 +240,40 @@ export default class WorkTask extends React.Component {
                   onClick={() => {this.props.history.push('/mgmt');}}>
                   Home
                 </button>
-                <button className="button__green" onClick={(e) => {
-                  this.state.tasks.map((task) => {
-                    try {
-                      let b = document.taskOptions.checkbox.length;
-                      let c = $('input[type=checkbox]:checked').length;
-                    }
-                    catch(err) {
-                      b = 0;
-                      c = 0;
-                    }
-                    let dueDateObj = moment(task.dueDate).add(task.frequency, 'months');
-                    let dueDate = dueDateObj.format('YYYY-MM-DD');
-                    let taskId = task._id;
-                    if (c != b) {
-                      e.preventDefault();
-                      return alert('Please complete all tasks before completing the work order');
-                    } else if (task.frequency === "0") {
-                      Meteor.call('task.remove', formId);
-                      this.props.history.push('/mgmt');
-                      this.props.history.go();
-                    } else if (c === b && !!this.refs.notes.value) {
-                      e.preventDefault();
-                      Meteor.call('task.workneeded', formId);
-                      this.props.history.push('/mgmt');
-                      this.props.history.go();
-                    } else if (c === b && !this.refs.notes.value) {
-                      e.preventDefault();
-                      Meteor.call('task.complete', formId);
-                      Meteor.call('dueDate.update', dueDate, formId);
-                      this.props.history.push('/mgmt');
-                      this.props.history.go();
-                    }
-                  })
+                <button className="button__green"
+                  style={{display: this.state.isCompleted ? 'none' : null}}
+                  onClick={(e) => {
+                    this.state.tasks.map((task) => {
+                      try {
+                        b = document.taskOptions.checkbox.length;
+                        c = $('input[type=checkbox]:checked').length;
+                      }
+                      catch(err) {
+                        b = 0;
+                        c = 0;
+                      }
+                      let dueDateObj = moment(task.dueDate).add(task.frequency, 'months');
+                      let dueDate = dueDateObj.format('YYYY-MM-DD');
+                      let taskId = task._id;
+                      if (c != b) {
+                        e.preventDefault();
+                        return alert('Please complete all tasks before completing the work order');
+                      } else if (task.frequency === "0") {
+                        Meteor.call('task.remove', formId);
+                        this.props.history.push('/mgmt');
+                        this.props.history.go();
+                      } else if (c === b && !!this.refs.notes.value) {
+                        e.preventDefault();
+                        Meteor.call('task.workneeded', formId);
+                        this.props.history.push('/mgmt');
+                        this.props.history.go();
+                      } else if (c === b && !this.refs.notes.value) {
+                        e.preventDefault();
+                        Meteor.call('task.complete', formId, dueDate);
+                        this.props.history.push('/mgmt');
+                        this.props.history.go();
+                      }
+                    })
                 }}>
                   Complete Task
                 </button>

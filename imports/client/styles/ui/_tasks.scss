@@ -20,6 +20,16 @@
   background: rgba(255,210,0,.03);
   border: 1px solid rgba(255,210,0,1);
 }
+.task-completed {
+  background: rgba(149,160,181,.3);
+}
+.task-header-completed {
+  background: #a86428;
+  color: #ffffff;
+  cursor: default;
+  margin-bottom: .75rem;
+  padding: .5rem;
+}
 .task__list {
   margin: 1.3rem;
   text-align: center;

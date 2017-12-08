@@ -22,6 +22,7 @@ export default class Mgmt extends React.Component {
       lastname: "",
       itemVisible: true,
       menuStatus: false,
+      completedTasks: [],
       createUserModalIsOpen: false,
       tasks: [],
       currentUser: [],
@@ -68,7 +69,18 @@ export default class Mgmt extends React.Component {
       if (taskSub.ready() && userSub.ready()) {
         document.getElementById('loader').style.display = "none";
         document.getElementById('content').style.display = "block";
+        document.getElementById('completedFrom').value = moment().startOf('year').format('YYYY-MM-DD');
+        document.getElementById('completedTo').value = moment().format('YYYY-MM-DD');
       }
+      this.state.tasks.map((task) => {
+        let completedFromObj = document.getElementById('completedFrom').value;
+        let completedToObj = document.getElementById('completedTo').value;
+        let completedFrom = moment(completedFromObj).format('YYYY-MM-DD');
+        let completedTo = moment(completedToObj).add(1,'d').format('YYYY-MM-DD');
+        let sortedTasks = moment(task.completedOn).format('YYYY-MM-DD');
+        const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
+        this.setState ({ completedTasks });
+      })
     });
   }
 
@@ -148,48 +160,6 @@ export default class Mgmt extends React.Component {
     });
   }
 
-  renderAssignedTaskModal() {
-    return <div ref="assignTaskModal" className="modal-assignTask"
-      style={{display: this.state.showAssignTaskModal ? 'block' : 'none'}}>
-      <div className="modal-content">
-        <span className="mbri-share modal_usericon"/>
-        <h2 ref="assignTaskLabel" className="modal_text">Assign this task to...</h2>
-        <form>
-          <select id="userSelect" ref="userSelect" onChange={(e) => {
-            e.preventDefault();
-          }}>
-            <option value="">Select a user</option>
-            {this.renderOptions()}
-          </select>
-          <div>
-            <button className="button__green"
-              onClick={(e) => {
-                e.preventDefault();
-                let taskId = localStorage.getItem('selectedTaskId');
-                let opt = this.refs.userSelect.options[this.refs.userSelect.selectedIndex];
-                let res = opt.text.split(" , ");
-                let firstname = res[1];
-                let lastname = res[0];
-                let assignedOn = new Date();
-                let assignedId = this.refs.userSelect.value;
-                Meteor.call('task.assign', taskId, assignedId, firstname, lastname, assignedOn);
-                this.setState({showAssignTaskModal: false});
-              }}>
-                Assign Task
-            </button>
-            <button className="button__red"
-              onClick={(e) => {
-                e.preventDefault();
-                this.setState({showAssignTaskModal: false});
-              }}>
-                Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  }
-
   renderUpcomingTasks() {
     return this.state.tasks.map((task) => {
       return this.state.currentUser.map((currentUser) => {
@@ -201,7 +171,7 @@ export default class Mgmt extends React.Component {
         } else if (moment().isAfter(yellowTask) && moment().isBefore(task.dueDate) ) {
           taskDiv = `task-div task-comingdue`;
         }
-        if (!task.assignedId && !!currentUser.isAdmin && !task.review) {
+        if (!task.assignedId && !!currentUser.isAdmin && !task.review && !task.completed) {
           return <div key={task._id} ref={task._id} className={taskDiv}
             style={{display: currentUser.isAdmin ? 'block' : 'none'}}>
             <div onClick={() => {
@@ -285,7 +255,7 @@ export default class Mgmt extends React.Component {
         } else if (moment().isAfter(yellowTask) && moment().isBefore(task.dueDate) ) {
           taskDiv = `task-div task-comingdue`;
         }
-        if (!!currentUser.isAdmin && !!task.assignedId) {
+        if (!!currentUser.isAdmin && !!task.assignedId && !task.completed) {
           return <div key={task._id} className={taskDiv}
             style={{display: currentUser.isAdmin ? 'block' : 'none'}}>
             <div onClick={() => {
@@ -308,7 +278,7 @@ export default class Mgmt extends React.Component {
               Meteor.call('task.assign', taskId, assignedId, firstname, lastname, assignedOn);
             }}>Unassign Task</button>
           </div>
-        } else if (task.assignedId === currentUser.userId) {
+        } else if (task.assignedId === currentUser.userId && !task.completed) {
           return <div key={task._id} className={taskDiv}>
             <div onClick={() => {
               localStorage.setItem("selectedTaskId", task.formId);
@@ -336,7 +306,7 @@ export default class Mgmt extends React.Component {
         } else if (moment().isAfter(yellowTask) && moment().isBefore(task.dueDate) ) {
           taskDiv = `task-div task-comingdue`;
         }
-        if (!task.assignedId && !!currentUser.isAdmin && !!task.review) {
+        if (!task.assignedId && !!currentUser.isAdmin && !!task.review && !task.completed) {
           return <div key={task._id} ref={task._id} className={taskDiv}
             style={{display: currentUser.isAdmin ? 'block' : 'none'}}>
             <div onClick={() => {
@@ -363,6 +333,77 @@ export default class Mgmt extends React.Component {
         };
       })
     });
+  }
+
+  renderCompletedTasks() {
+    return this.state.completedTasks.map((completedTask) => {
+      return this.state.currentUser.map((currentUser) => {
+        if (!!currentUser.isAdmin) {
+          return <div key={completedTask._id} ref={completedTask._id} className="task-div"
+            style={{display: currentUser.isAdmin ? 'block' : 'none'}}>
+            <div onClick={() => {
+              localStorage.setItem("selectedTaskId", completedTask.formId);
+              history.push(`/${completedTask.formId}`);
+              history.go();
+            }}>
+              <p className="task-header-completed">{moment(completedTask.completedOn).format('dddd, MMM Do YYYY')}</p>
+              <h3 className="task-info">
+                {completedTask.subTask}
+              </h3>
+              <p className="task-info">
+                {completedTask.taskName}
+              </p>
+              <p className="task-info">
+                {completedTask.completedDate}
+              </p>
+            </div>
+          </div>
+        };
+      })
+    });
+  }
+//End Task Rendering
+//Begin Modal Section
+  renderAssignedTaskModal() {
+    return <div ref="assignTaskModal" className="modal-assignTask"
+      style={{display: this.state.showAssignTaskModal ? 'block' : 'none'}}>
+      <div className="modal-content">
+        <span className="mbri-share modal_usericon"/>
+        <h2 ref="assignTaskLabel" className="modal_text">Assign this task to...</h2>
+        <form>
+          <select id="userSelect" ref="userSelect" onChange={(e) => {
+            e.preventDefault();
+          }}>
+            <option value="">Select a user</option>
+            {this.renderOptions()}
+          </select>
+          <div>
+            <button className="button__green"
+              onClick={(e) => {
+                e.preventDefault();
+                let taskId = localStorage.getItem('selectedTaskId');
+                let opt = this.refs.userSelect.options[this.refs.userSelect.selectedIndex];
+                let res = opt.text.split(" , ");
+                let firstname = res[1];
+                let lastname = res[0];
+                let assignedOn = new Date();
+                let assignedId = this.refs.userSelect.value;
+                Meteor.call('task.assign', taskId, assignedId, firstname, lastname, assignedOn);
+                this.setState({showAssignTaskModal: false});
+              }}>
+                Assign Task
+            </button>
+            <button className="button__red"
+              onClick={(e) => {
+                e.preventDefault();
+                this.setState({showAssignTaskModal: false});
+              }}>
+                Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   }
 
   renderInviteUserModal() {
@@ -426,7 +467,7 @@ export default class Mgmt extends React.Component {
       </div>
     })
   }
-
+//End Modal Section
   render () {
     return (
       <div className="wrapper" id="overLord">
@@ -553,8 +594,26 @@ export default class Mgmt extends React.Component {
                 <h3 className="item--border item--padding item--right--color">
                   <span className="mbri-like"></span>
                   <p>Completed Tasks</p>
+                  <p>Show Tasks From: <input type="date" id="completedFrom"
+                    className="item-date-input" ref="completedFrom"
+                    onChange={() => {
+                      let completedFrom = this.refs.completedFrom.value;
+                      let completedTo = this.refs.completedTo.value;
+                      const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
+                      this.setState ({ completedTasks });
+                    }}/>
+                  </p>
+                  <p>Show Tasks To: <input type="date" id="completedTo" ref="completedTo"
+                    className="item-date-input"
+                  onChange={() => {
+                    let completedFrom = this.refs.completedFrom.value;
+                    let completedTo = this.refs.completedTo.value;
+                    const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
+                    this.setState ({ completedTasks });
+                  }}/>
+                  </p>
                 </h3>
-                <p><strong>Coming Soon</strong></p>
+                {this.renderCompletedTasks()}
               </div>
             </div>
           </div>
