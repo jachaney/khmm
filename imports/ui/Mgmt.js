@@ -29,6 +29,7 @@ export default class Mgmt extends React.Component {
       users: [],
       showAssignTaskModal: false,
       showInviteUserModal: false,
+      showUserProfileModal: false,
     }
   };
 
@@ -467,12 +468,71 @@ export default class Mgmt extends React.Component {
       </div>
     })
   }
+
+  renderUserProfileModal() {
+    return this.state.currentUser.map((currentUser) => {
+      return <div key={currentUser._id} ref="inviteUserModal" className="modal-assignTask"
+        style={{display: this.state.showUserProfileModal ? 'block' : 'none'}}>
+        <div className="modal-content">
+          <span className="mbri-users modal_usericon"/>
+          <h2 ref="userProfileModalLabel" className="modal_text">User Profile</h2>
+            <div>
+              <input className="modal_text modal_input" id="userProfileFirstName" type="text"
+                placeholder="Please enter your first name"/>
+              <input className="modal_text modal_input" id="userProfileLastName"
+                type="text" placeholder="Please enter your last name"/>
+            </div>
+            <div>
+              <button className="button__green"
+                onClick={(e) => {
+                  let a = document.getElementById("inviteEmail").value;
+                  let b = document.getElementById("confirmInviteEmail").value;
+                  if (a === b) {
+                    e.preventDefault();
+                    let invitee = document.getElementById("inviteEmail").value;
+                    let inviter = currentUser.firstname + " " + currentUser.lastname;
+                    let newPrimeId = currentUser.primeId;
+                    let willBeAdmin = document.getElementById("inviteeWillBeAdmin").checked;
+                    Meteor.call('user.verify', invitee, function(err, userVerified) {
+                      if (!userVerified) {
+                        alert("User not found");
+                      } else {
+                        Meteor.call('user.invite', invitee, inviter, newPrimeId, willBeAdmin);
+                        this.setState({showInviteUserModal: false});
+                        document.getElementById("inviteEmail").value = "";
+                        document.getElementById("confirmInviteEmail").value = "";
+                        document.getElementById("inviteeWillBeAdmin").checked = false;
+                      }
+                    }.bind(this));
+                  } else {
+                    e.preventDefault();
+                    alert("E-mail addresses do not match.");
+                  }
+                }}>
+                  Send
+              </button>
+              <button className="button__red"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("inviteEmail").value = '';
+                  document.getElementById("confirmInviteEmail").value = '';
+                  document.getElementById("inviteeWillBeAdmin").checked = false;
+                  this.setState({showInviteUserModal: false});
+                }}>
+                  Cancel
+              </button>
+            </div>
+        </div>
+      </div>
+    })
+  }
 //End Modal Section
   render () {
     return (
       <div className="wrapper" id="overLord">
         {this.renderAssignedTaskModal()}
         {this.renderInviteUserModal()}
+        {this.renderUserProfileModal()}
         <div id="loader" className="loader"></div>
         <div id="content">
           {/* Sidenav starts here */}
@@ -589,30 +649,41 @@ export default class Mgmt extends React.Component {
                 {this.renderWorkNeeded()}
               </div>
             </div>
-            <div ref="completedTasks" className="pure-u-1 pure-u-sm-1-4 item__right">
+            <div ref="completedTasks" className="pure-u-1 pure-u-sm-1-4 item-completed-tasks">
               <div className="item--padding">
-                <h3 className="item--border item--padding item--right--color">
-                  <span className="mbri-like"></span>
-                  <p>Completed Tasks</p>
-                  <p>Show Tasks From: <input type="date" id="completedFrom"
-                    className="item-date-input" ref="completedFrom"
-                    onChange={() => {
-                      let completedFrom = this.refs.completedFrom.value;
-                      let completedTo = this.refs.completedTo.value;
-                      const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
-                      this.setState ({ completedTasks });
-                    }}/>
-                  </p>
-                  <p>Show Tasks To: <input type="date" id="completedTo" ref="completedTo"
-                    className="item-date-input"
-                  onChange={() => {
-                    let completedFrom = this.refs.completedFrom.value;
-                    let completedTo = this.refs.completedTo.value;
-                    const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
-                    this.setState ({ completedTasks });
-                  }}/>
-                  </p>
-                </h3>
+                <div className="item--border item-completed-tasks item-completed-color pure-u-1">
+                  <h3 className="item-completed-banner item--padding item--right--color">
+                    <span className="mbri-like"></span>
+                    <p>Completed Tasks</p>
+                  </h3>
+                  <div className="item-completed-label pure-u-1-2">
+                    <label>Show Tasks From:</label>
+                  </div>
+                  <div className="pure-u-1-2">
+                    <input type="date" id="completedFrom"
+                      className="item-completed-datepicker" ref="completedFrom"
+                      onChange={() => {
+                        let completedFrom = this.refs.completedFrom.value;
+                        let completedTo = this.refs.completedTo.value;
+                        const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
+                        this.setState ({ completedTasks });
+                      }}/>
+                  </div>
+                  <br/>
+                  <div className="item-completed-label pure-u-1-2">
+                    <label>Show Tasks To:</label>
+                  </div>
+                  <div className="pure-u-1-2">
+                    <input type="date" id="completedTo" ref="completedTo"
+                      className="item-completed-datepicker"
+                      onChange={() => {
+                        let completedFrom = this.refs.completedFrom.value;
+                        let completedTo = this.refs.completedTo.value;
+                        const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
+                        this.setState ({ completedTasks });
+                      }}/>
+                    </div>
+                </div>
                 {this.renderCompletedTasks()}
               </div>
             </div>

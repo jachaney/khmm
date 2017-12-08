@@ -57,11 +57,17 @@
   max-width: 75vw;
   text-align: center;
 }
-.item__right {
+.item-completed-tasks {
   background: #ffffff;
+  // text-align: center;
+}
+.item-completed-banner {
   text-align: center;
 }
-.item--right--color {
+.item-completed-filter {
+  text-align: left;
+}
+.item-completed-color {
   background: #a86428;
   color: #ffffff;
   margin-bottom: .75rem;
@@ -85,7 +91,7 @@
 }
 .item-date-input {
   color: #000000;
-  margin: .3rem 0 .3rem 0;
+  margin: .3rem 0 1.3rem 0;
 }
 .item-sow-textbox-with-delete {
   width: 550px;
@@ -128,6 +134,16 @@
   background: #005B96;
   color: #ffffff;
   text-align: center;
+}
+.item-completed-label {
+  font-weight: 400;
+  text-align: center;
+}
+.item-completed-datepicker {
+  color: #555555;
+  font-weight: 400;
+  margin: 0 0 1.3rem 0;
+  text-align: left;
 }
 .item--primeTask-new {
   background: #005B96;
