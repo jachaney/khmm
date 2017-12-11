@@ -3,6 +3,15 @@
   padding: 1.3rem;
   text-align: left;
 }
+.item-banner-padding {
+  padding: 0 0 1.3rem 0;
+}
+.item-menu-icon {
+  font-size: 3rem;
+  font-weight: 100; 
+  // padding: 0 0 1.3rem 0;
+  vertical-align: super;
+}
 .item-margin {
   margin: .5rem;
 }
@@ -237,6 +246,11 @@
   font-weight: 900;
 }
 .mbri-like {
+  font-size:3rem;
+  font-weight: 900;
+  color:#ffffff;
+}
+.mbri-success {
   font-size:3rem;
   font-weight: 900;
   color:#ffffff;

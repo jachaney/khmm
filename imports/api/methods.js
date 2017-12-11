@@ -129,22 +129,12 @@ Meteor.methods({
       workItem.formId = newFormId;
       WorkItems.insert(workItem);
     })
-    // WorkItems.update({formId},
-    // {$set: {
-    //   checked: false
-    //   }
-    // },{multi: true});
     RemItems.find({formId}).forEach(function(remItem) {
       remItem._id = Random.id();
       remItem.checked = false;
       remItem.formId = newFormId;
       RemItems.insert(remItem);
     })
-    // RemItems.update({formId},
-    // {$set: {
-    //   checked: false
-    //   }
-    // },{multi: true});
   },
   'task.selectDefault'(formId, val) {
     if (!this.userId) {

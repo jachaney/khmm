@@ -4,6 +4,7 @@ import createHistory from 'history/createBrowserHistory';
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 import moment from 'moment';
+import FlipMove from 'react-flip-move';
 
 import { TaskList } from './../api/methods';
 import { UserInfoDB } from './../api/methods';
@@ -18,18 +19,22 @@ export default class Mgmt extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      firstname: "",
-      lastname: "",
-      itemVisible: true,
-      menuStatus: false,
       completedTasks: [],
       createUserModalIsOpen: false,
-      tasks: [],
       currentUser: [],
-      users: [],
+      firstname: "",
+      itemVisible: true,
+      lastname: "",
+      menuStatus: false,
       showAssignTaskModal: false,
       showInviteUserModal: false,
       showUserProfileModal: false,
+      showUserInfoDiv: Boolean,
+      showChangePasswordDiv: Boolean,
+      tasks: [],
+      updateProfile: false,
+      updatePassword: false,
+      users: [],
     }
   };
 
@@ -46,6 +51,8 @@ export default class Mgmt extends React.Component {
       const currentUser = UserInfoDB.find({userId: Meteor.userId()}).fetch();
       this.setState({ currentUser })
       this.state.currentUser.map((currentUser) => {
+        this.refs.userProfileFirstName.value = currentUser.firstname;
+        this.refs.userProfileLastName.value = currentUser.lastname;
         if (!currentUser.isAdmin) {
           this.refs.createANewTask.style.display = "none";
           this.refs.createANewUser.style.display = "none";
@@ -127,7 +134,7 @@ export default class Mgmt extends React.Component {
     document.getElementById("mySidenav").style.width = "0";
     document.getElementById("sidenav-button").style.left = "0";
     this.setState({menuStatus: ""})
-    document.getElementById("sidenav-button-icon").className = "mbri-menu";
+    document.getElementById("sidenav-button-icon").className = "fa fa-navicon item-menu-icon";
   }
 
   openNav(e) {
@@ -136,12 +143,12 @@ export default class Mgmt extends React.Component {
       document.getElementById("mySidenav").style.width = "25rem";
       document.getElementById("sidenav-button").style.left = "25rem";
       this.setState({menuStatus: true});
-      document.getElementById("sidenav-button-icon").className = "mbri-close mbri-close-white";
+      document.getElementById("sidenav-button-icon").className = "fa fa-close item-menu-icon";
     } else {
       document.getElementById("mySidenav").style.width = "0";
       document.getElementById("sidenav-button").style.left = "0";
       this.setState({menuStatus: ""})
-      document.getElementById("sidenav-button-icon").className = "mbri-menu";
+      document.getElementById("sidenav-button-icon").className = "fa fa-navicon item-menu-icon";
     }
   }
 
@@ -180,7 +187,7 @@ export default class Mgmt extends React.Component {
               history.push(`/${task.formId}`);
               history.go();
             }}>
-              <p className="task-header-upcoming">{moment(task.dueDate).format('dddd, MMM Do YYYY')}</p>
+              <p className="task-header-upcoming">Due: {moment(task.dueDate).format('dddd, MMM Do YYYY')}</p>
               <h3 className="task-info">
                 {task.subTask}
               </h3>
@@ -214,7 +221,7 @@ export default class Mgmt extends React.Component {
             {/* Delete Task modal div starts here. */}
             <div ref="delTaskModal" className="modal-assignTask">
               <div className="modal-content">
-                <span className="mbri-trash modal_usericon"/>
+                <span className="fa fa-trash-o modal_usericon item-banner-padding"/>
                 <h2 ref="delTaskLabel" className="modal_text">Are you sure that you want to delete this task?</h2>
                 <form>
                   <div>
@@ -264,7 +271,7 @@ export default class Mgmt extends React.Component {
               history.push(`/${task.formId}`);
               history.go();
             }}>
-            <p className="task-header-assigned">{moment(task.dueDate).format('dddd, MMM Do YYYY')}</p>
+            <p className="task-header-assigned">Due: {moment(task.dueDate).format('dddd, MMM Do YYYY')}</p>
             <h3 className="task-info">{task.subTask}</h3>
             <p className="task-info">{task.taskName}</p>
             <p className="task-info">Assigned to: {task.firstname} {task.lastname}</p>
@@ -315,7 +322,7 @@ export default class Mgmt extends React.Component {
               history.push(`/${task.formId}`);
               history.go();
             }}>
-              <p className="task-header-workneeded">{moment(task.dueDate).format('dddd, MMM Do YYYY')}</p>
+              <p className="task-header-workneeded">Due: {moment(task.dueDate).format('dddd, MMM Do YYYY')}</p>
               <h3 className="task-info">
                 {task.subTask}
               </h3>
@@ -347,7 +354,7 @@ export default class Mgmt extends React.Component {
               history.push(`/${completedTask.formId}`);
               history.go();
             }}>
-              <p className="task-header-completed">{moment(completedTask.completedOn).format('dddd, MMM Do YYYY')}</p>
+              <p className="task-header-completed">Completed: {moment(completedTask.completedOn).format('dddd, MMM Do YYYY')}</p>
               <h3 className="task-info">
                 {completedTask.subTask}
               </h3>
@@ -369,7 +376,7 @@ export default class Mgmt extends React.Component {
     return <div ref="assignTaskModal" className="modal-assignTask"
       style={{display: this.state.showAssignTaskModal ? 'block' : 'none'}}>
       <div className="modal-content">
-        <span className="mbri-share modal_usericon"/>
+        <span className="fa fa-share modal_usericon item-banner-padding"/>
         <h2 ref="assignTaskLabel" className="modal_text">Assign this task to...</h2>
         <form>
           <select id="userSelect" ref="userSelect" onChange={(e) => {
@@ -412,8 +419,8 @@ export default class Mgmt extends React.Component {
       return <div key={currentUser._id} ref="inviteUserModal" className="modal-assignTask"
         style={{display: this.state.showInviteUserModal ? 'block' : 'none'}}>
         <div className="modal-content">
-          <span className="mbri-paper-plane modal_usericon"/>
-          <h2 ref="iniviteModalLabel" className="modal_text">Invite someone to your domain</h2>
+          <span className="fa fa-paper-plane-o modal_usericon"/>
+          <h2 ref="iniviteModalLabel" className="modal_text">Invite someone into your domain</h2>
             <div>
               <input className="modal_text" id="inviteeWillBeAdmin" type="checkbox" value="true"/>
               <label className="modal_text">Check this box if this user will be an administrator.</label>
@@ -471,59 +478,151 @@ export default class Mgmt extends React.Component {
 
   renderUserProfileModal() {
     return this.state.currentUser.map((currentUser) => {
-      return <div key={currentUser._id} ref="inviteUserModal" className="modal-assignTask"
+      if (!!this.state.showUserInfoDiv) {
+        bannerimage = "fa fa-user-o modal_usericon";
+      } else if (!!this.state.showChangePasswordDiv) {
+        bannerimage = "fa fa-key modal_usericon";
+      }
+      return <form key={currentUser._id}>
+        <div ref="inviteUserModal" className="modal-assignTask"
         style={{display: this.state.showUserProfileModal ? 'block' : 'none'}}>
         <div className="modal-content">
-          <span className="mbri-users modal_usericon"/>
-          <h2 ref="userProfileModalLabel" className="modal_text">User Profile</h2>
-            <div>
-              <input className="modal_text modal_input" id="userProfileFirstName" type="text"
-                placeholder="Please enter your first name"/>
+          <span className={bannerimage}/>
+          <h2 ref="userProfileModalLabel" className="modal_text"
+            style={{display: this.state.showUserInfoDiv ? "block" : "none"}}>
+            Your Profile
+          </h2>
+          <h2 ref="userProfileModalLabel" className="modal_text"
+            style={{display: this.state.showChangePasswordDiv ? "block" : "none"}}>
+            Change Your Password
+          </h2>
+            <div ref="userInfoDiv"
+              style={{display: this.state.showUserInfoDiv ? "block" : "none"}}>
+              <label>First Name:</label>
+              <input className="modal_text modal_input" id="userProfileFirstName"
+                type="text" ref="userProfileFirstName"
+                placeholder="Please enter your first name"
+                onChange={() => {
+                  let firstname = this.refs.userProfileFirstName.value;
+                  let lastname = this.refs.userProfileLastName.value;
+                  if ( firstname != currentUser.firstname || lastname != currentUser.lastname) {
+                    this.setState({updateProfile: true})
+                  } else {
+                    this.setState({updateProfile: false})
+                  }
+                }}
+              />
+              <label>Last Name:</label>
               <input className="modal_text modal_input" id="userProfileLastName"
-                type="text" placeholder="Please enter your last name"/>
+                ref="userProfileLastName" type="text"
+                placeholder="Please enter your last name"
+                onChange={() => {
+                  let firstname = this.refs.userProfileFirstName.value;
+                  let lastname = this.refs.userProfileLastName.value;
+                  if ( firstname != currentUser.firstname || lastname != currentUser.lastname) {
+                    this.setState({updateProfile: true})
+                  } else {
+                    this.setState({updateProfile: false})
+                  }
+                }}
+              />
+            </div>
+            <div ref="changePasswordDiv"
+              style={{display: this.state.showChangePasswordDiv ? "block" : "none"}}>
+              <input className="modal_text modal_input" id="userChangePasswordOriginal"
+                ref="userChangePasswordOriginal" type="password"
+                placeholder="Please enter your current password"
+              />
+              <input className="modal_text modal_input" id="userChangePasswordFirst"
+                ref="userChangePasswordFirst" type="password"
+                placeholder="Please enter your new password"
+                onChange={() => {
+                  if (!!this.refs.userChangePasswordFirst.value) {
+                    this.setState({updatePassword: true});
+                  } else {
+                    this.setState({updatePassword: false});
+                  }
+                }}
+              />
+              <input className="modal_text modal_input" id="userChangePasswordSecond"
+                ref="userChangePasswordSecond" type="password"
+                placeholder="Please confirm your new password"
+              />
             </div>
             <div>
-              <button className="button__green"
-                onClick={(e) => {
-                  let a = document.getElementById("inviteEmail").value;
-                  let b = document.getElementById("confirmInviteEmail").value;
-                  if (a === b) {
-                    e.preventDefault();
-                    let invitee = document.getElementById("inviteEmail").value;
-                    let inviter = currentUser.firstname + " " + currentUser.lastname;
-                    let newPrimeId = currentUser.primeId;
-                    let willBeAdmin = document.getElementById("inviteeWillBeAdmin").checked;
-                    Meteor.call('user.verify', invitee, function(err, userVerified) {
-                      if (!userVerified) {
-                        alert("User not found");
-                      } else {
-                        Meteor.call('user.invite', invitee, inviter, newPrimeId, willBeAdmin);
-                        this.setState({showInviteUserModal: false});
-                        document.getElementById("inviteEmail").value = "";
-                        document.getElementById("confirmInviteEmail").value = "";
-                        document.getElementById("inviteeWillBeAdmin").checked = false;
-                      }
-                    }.bind(this));
-                  } else {
-                    e.preventDefault();
-                    alert("E-mail addresses do not match.");
-                  }
-                }}>
-                  Send
-              </button>
-              <button className="button__red"
+              <button className="button__green" type={this.state.updateProfile || this.state.updatePassword ? "submit" : "button"}
+                style={{display: this.state.showUserInfoDiv || this.state.updatePassword ? 'inline-block' : 'none'}}
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById("inviteEmail").value = '';
-                  document.getElementById("confirmInviteEmail").value = '';
-                  document.getElementById("inviteeWillBeAdmin").checked = false;
-                  this.setState({showInviteUserModal: false});
+                  let firstname = this.refs.userProfileFirstName.value.trim();
+                  let lastname = this.refs.userProfileLastName.value.trim();
+                  let oldPassword = this.refs.userChangePasswordOriginal.value.trim();
+                  let newPassword = this.refs.userChangePasswordFirst.value.trim();
+                  let verifyPassword = this.refs.userChangePasswordSecond.value.trim();
+                  if (!this.state.updateProfile && !this.updatePassword) {
+                    this.setState({showUserInfoDiv: false});
+                    this.setState({showChangePasswordDiv: true});
+                  }
+                  if (!!this.state.updateProfile && !!firstname && !!lastname) {
+                    Meteor.call('userinfo.update', firstname, lastname);
+                    this.setState({updateProfile: false});
+                  }
+                  if (!firstname || !lastname) {
+                    return alert("All fields must be filled out.");
+                  }
+                  if (!!this.state.updatePassword && newPassword === verifyPassword && newPassword.length < 8) {
+                    return alert("Your new password must be at least 8 characters long.")
+                  }
+                  if (!!this.state.updatePassword && newPassword === verifyPassword && newPassword.length >= 8) {
+                    Accounts.changePassword(oldPassword, newPassword, function(err) {
+                      if (err) {
+                        return alert(err.reason);
+                      } else {
+                        this.refs.userChangePasswordOriginal.value = "";
+                        this.refs.userChangePasswordFirst.value = "";
+                        this.refs.userChangePasswordSecond.value = "";
+                        this.setState({showChangePasswordDiv: false});
+                        this.setState({updatePassword: false});
+                        this.setState({showUserInfoDiv: true});
+                        return alert("Password changed");
+                      }
+                    }.bind(this))
+                  }
+                  if (!!this.state.updatePassword && newPassword != verifyPassword) {
+                    return alert("Your new passwords do not match. Please re-enter your new password.");
+                  }
                 }}>
-                  Cancel
+                {this.state.updateProfile || this.state.updatePassword ? "Save" : "Change Your Password"}
+              </button>
+              <button className="button__red" type={this.state.updateProfile || this.state.updatePassword ? "button" : "submit"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (this.state.showUserInfoDiv === true && !this.state.updateProfile) {
+                    document.getElementById('userProfileFirstName').value = currentUser.firstname;
+                    document.getElementById('userProfileLastName').value = currentUser.lastname;
+                    this.setState({updateProfile: false});
+                    this.setState({showChangePasswordDiv: false});
+                    this.setState({showUserInfoDiv: true});
+                    this.setState({showUserProfileModal: false});
+                  } else if (this.state.showChangePasswordDiv === true) {
+                    this.refs.userChangePasswordOriginal.value = "";
+                    this.refs.userChangePasswordFirst.value = "";
+                    this.refs.userChangePasswordSecond.value = "";
+                    this.setState({showChangePasswordDiv: false});
+                    this.setState({updatePassword: false});
+                    this.setState({showUserInfoDiv: true});
+                  } else if (this.state.updateProfile === true) {
+                    this.setState({updateProfile: false});
+                    this.refs.userProfileFirstName.value = currentUser.firstname;
+                    this.refs.userProfileLastName.value = currentUser.lastname;
+                  }
+                }}>
+                  {this.state.updateProfile || this.state.showChangePasswordDiv ? "Cancel" : "Close"}
               </button>
             </div>
         </div>
       </div>
+    </form>
     })
   }
 //End Modal Section
@@ -539,10 +638,17 @@ export default class Mgmt extends React.Component {
           <div>
             <div id="mySidenav" className="sidenav">
               <a ref="myProfile" onClick={() => {
-                  history.push('/userinfo');
-                  history.go();
+                  console.log("state of udpateProfile: ", this.state.updateProfile);
+                  console.log("state of updatePassword: ", this.state.updatePassword);
+                  document.getElementById("mySidenav").style.width = "0";
+                  document.getElementById("sidenav-button").style.left = "0";
+                  this.setState({menuStatus: ""})
+                  document.getElementById("sidenav-button-icon").className = "fa fa-navicon item-menu-icon";
+                  this.setState({showUserInfoDiv: true});
+                  this.setState({showChangePasswordDiv: false});
+                  this.setState({showUserProfileModal: true});
                 }}>
-                My Profile
+                Profile
               </a>
               <a ref="createANewTask" onClick={() => {this.props.history.push('/newtask')}}>
                 Create a New Task
@@ -551,7 +657,7 @@ export default class Mgmt extends React.Component {
                   document.getElementById("mySidenav").style.width = "0";
                   document.getElementById("sidenav-button").style.left = "0";
                   this.setState({menuStatus: ""})
-                  document.getElementById("sidenav-button-icon").className = "mbri-menu";
+                  document.getElementById("sidenav-button-icon").className = "fa fa-navicon item-menu-icon";
                   this.refs.createUserModal.style.display = "block";
                 }
               }>
@@ -561,7 +667,7 @@ export default class Mgmt extends React.Component {
                   document.getElementById("mySidenav").style.width = "0";
                   document.getElementById("sidenav-button").style.left = "0";
                   this.setState({menuStatus: ""})
-                  document.getElementById("sidenav-button-icon").className = "mbri-menu";
+                  document.getElementById("sidenav-button-icon").className = "fa fa-navicon item-menu-icon";
                   this.setState({showInviteUserModal: true});
                 }
               }>
@@ -572,15 +678,15 @@ export default class Mgmt extends React.Component {
               </a>
             </div>
             <a id="sidenav-button" title="Menu" className="button__menu" onClick={this.openNav.bind(this)}>
-              <span id="sidenav-button-icon" className="mbri-menu"/>
+              <span id="sidenav-button-icon" className="fa fa-navicon item-menu-icon"/>
             </a>
           </div>
           {/* Sidenave ends here */}
           {/* Create User Modal starts here */}
           <div ref="createUserModal" className="modal-createUser">
             <div className="modal-content">
-              <span className="mbri-users modal_usericon"/>
-              <h2 className="modal_text">Add a New User</h2>
+              <span className="fa fa-user-plus modal_usericon item-banner-padding"/>
+              <h2 className="modal_text">Create a New User</h2>
               <form onSubmit={this.onCreateUser.bind(this)} noValidate>
                 <div>
                   <input className="modal_text" type="checkbox" id="isAdminCheck"/>
@@ -625,7 +731,7 @@ export default class Mgmt extends React.Component {
             <div ref="upcomingTasks" className="pure-u-1 pure-u-sm-1-4 item__left">
               <div className="item--padding">
                 <h3 className="item--border item--padding item--left--label">
-                  <span className="mbri-clock"></span>
+                  <span className="fa fa-calendar fa-2x item-banner-padding"></span>
                   <p>Upcoming Tasks</p>
                 </h3>
                 {this.renderUpcomingTasks()}
@@ -634,7 +740,7 @@ export default class Mgmt extends React.Component {
             <div ref="assignedTasks" className="pure-u-1 pure-u-sm-1-4 item__middle">
               <div className="item--padding">
                 <h3 className="item--border item--padding item--middle--color">
-                  <span className="mbri-share item-icon"></span>
+                  <span className="fa fa-share fa-2x item-banner-padding"></span>
                   <p>Assigned Tasks</p>
                 </h3>
                 {this.renderAssignedTasks()}
@@ -643,7 +749,7 @@ export default class Mgmt extends React.Component {
             <div ref="workNeeded" className="pure-u-1 pure-u-sm-1-4 item__middle">
               <div className="item--padding">
                 <h3 className="item--border item--padding item-needs-work-label">
-                  <span className="mbri-flag item-icon"></span>
+                  <span className="fa fa-asterisk fa-2x item-banner-padding"></span>
                   <p>Additional Work Needed</p>
                 </h3>
                 {this.renderWorkNeeded()}
@@ -653,13 +759,13 @@ export default class Mgmt extends React.Component {
               <div className="item--padding">
                 <div className="item--border item-completed-tasks item-completed-color pure-u-1">
                   <h3 className="item-completed-banner item--padding item--right--color">
-                    <span className="mbri-like"></span>
+                    <span className="fa fa-2x fa-calendar-check-o item-banner-padding"></span>
                     <p>Completed Tasks</p>
                   </h3>
-                  <div className="item-completed-label pure-u-1-2">
-                    <label>Show Tasks From:</label>
+                  <div className="item-completed-label pure-u-1 pure-u-sm-1-2">
+                    <label>Show Tasks From: </label>
                   </div>
-                  <div className="pure-u-1-2">
+                  <div className="pure-u-1 pure-u-sm-1-2">
                     <input type="date" id="completedFrom"
                       className="item-completed-datepicker" ref="completedFrom"
                       onChange={() => {
@@ -670,10 +776,10 @@ export default class Mgmt extends React.Component {
                       }}/>
                   </div>
                   <br/>
-                  <div className="item-completed-label pure-u-1-2">
+                  <div className="item-completed-label pure-u-1 pure-u-sm-1-2">
                     <label>Show Tasks To:</label>
                   </div>
-                  <div className="pure-u-1-2">
+                  <div className="pure-u-1 pure-u-sm-1-2">
                     <input type="date" id="completedTo" ref="completedTo"
                       className="item-completed-datepicker"
                       onChange={() => {
