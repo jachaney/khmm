@@ -8,8 +8,7 @@
 }
 .item-menu-icon {
   font-size: 3rem;
-  font-weight: 100; 
-  // padding: 0 0 1.3rem 0;
+  font-weight: 100;
   vertical-align: super;
 }
 .item-margin {
@@ -68,13 +67,12 @@
 }
 .item-completed-tasks {
   background: #ffffff;
-  // text-align: center;
 }
 .item-completed-banner {
   text-align: center;
 }
 .item-completed-filter {
-  text-align: left;
+  text-align: center;
 }
 .item-completed-color {
   background: #a86428;
@@ -145,13 +143,15 @@
   text-align: center;
 }
 .item-completed-label {
-  font-weight: 400;
+  font-weight: 500;
   text-align: center;
 }
 .item-completed-datepicker {
   color: #555555;
   font-weight: 400;
   margin: 0 0 1.3rem 0;
+  max-width: 90%;
+  padding: 0 0 0 .5rem;
   text-align: left;
 }
 .item--primeTask-new {

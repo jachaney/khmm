@@ -14,7 +14,6 @@ import Login from './Login';
 import Logout from './Logout';
 
 const history = createHistory();
-
 export default class Mgmt extends React.Component {
   constructor(props) {
     super(props);
@@ -421,7 +420,7 @@ export default class Mgmt extends React.Component {
         <div className="modal-content">
           <span className="fa fa-paper-plane-o modal_usericon"/>
           <h2 ref="iniviteModalLabel" className="modal_text">Invite someone into your domain</h2>
-            <div>
+            <div className="item--checkbox--padding">
               <input className="modal_text" id="inviteeWillBeAdmin" type="checkbox" value="true"/>
               <label className="modal_text">Check this box if this user will be an administrator.</label>
             </div>
@@ -688,7 +687,7 @@ export default class Mgmt extends React.Component {
               <span className="fa fa-user-plus modal_usericon item-banner-padding"/>
               <h2 className="modal_text">Create a New User</h2>
               <form onSubmit={this.onCreateUser.bind(this)} noValidate>
-                <div>
+                <div className="item--checkbox--padding">
                   <input className="modal_text" type="checkbox" id="isAdminCheck"/>
                   <label className="modal_text">Check this box if the user will be an administrator</label>
                 </div>
@@ -762,33 +761,34 @@ export default class Mgmt extends React.Component {
                     <span className="fa fa-2x fa-calendar-check-o item-banner-padding"></span>
                     <p>Completed Tasks</p>
                   </h3>
-                  <div className="item-completed-label pure-u-1 pure-u-sm-1-2">
-                    <label>Show Tasks From: </label>
-                  </div>
-                  <div className="pure-u-1 pure-u-sm-1-2">
-                    <input type="date" id="completedFrom"
-                      className="item-completed-datepicker" ref="completedFrom"
-                      onChange={() => {
-                        let completedFrom = this.refs.completedFrom.value;
-                        let completedTo = this.refs.completedTo.value;
-                        const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
-                        this.setState ({ completedTasks });
-                      }}/>
-                  </div>
-                  <br/>
-                  <div className="item-completed-label pure-u-1 pure-u-sm-1-2">
-                    <label>Show Tasks To:</label>
-                  </div>
-                  <div className="pure-u-1 pure-u-sm-1-2">
-                    <input type="date" id="completedTo" ref="completedTo"
-                      className="item-completed-datepicker"
-                      onChange={() => {
-                        let completedFrom = this.refs.completedFrom.value;
-                        let completedTo = this.refs.completedTo.value;
-                        const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
-                        this.setState ({ completedTasks });
-                      }}/>
+                  <div className="pure-u-1 item-completed-label">
+                    <div className="item-completed-label pure-u-1 pure-u-xl-1-2">
+                      <label>Show Tasks From: </label>
                     </div>
+                    <div className="pure-u-1 pure-u-xl-1-2">
+                      <input type="date" id="completedFrom"
+                        className="item-completed-datepicker" ref="completedFrom"
+                        onChange={() => {
+                          let completedFrom = this.refs.completedFrom.value;
+                          let completedTo = this.refs.completedTo.value;
+                          const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
+                          this.setState ({ completedTasks });
+                        }}/>
+                    </div>
+                    <div className="item-completed-label pure-u-1 pure-u-xl-1-2">
+                      <label>Show Tasks To: </label>
+                    </div>
+                    <div className="item-completed-label pure-u-1 pure-u-xl-1-2">
+                      <input type="date" id="completedTo" ref="completedTo"
+                        className="item-completed-datepicker"
+                        onChange={() => {
+                          let completedFrom = this.refs.completedFrom.value;
+                          let completedTo = this.refs.completedTo.value;
+                          const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
+                          this.setState ({ completedTasks });
+                        }}/>
+                    </div>
+                  </div>
                 </div>
                 {this.renderCompletedTasks()}
               </div>
