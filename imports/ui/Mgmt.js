@@ -76,8 +76,16 @@ export default class Mgmt extends React.Component {
       if (taskSub.ready() && userSub.ready()) {
         document.getElementById('loader').style.display = "none";
         document.getElementById('content').style.display = "block";
-        document.getElementById('completedFrom').value = moment().startOf('year').format('YYYY-MM-DD');
-        document.getElementById('completedTo').value = moment().format('YYYY-MM-DD');
+        if (!!sessionStorage.getItem('fromDate')) {
+          this.refs.completedFrom.value = sessionStorage.getItem('fromDate');
+        } else {
+          document.getElementById('completedFrom').value = moment().startOf('year').format('YYYY-MM-DD');
+        }
+        if(!!sessionStorage.getItem('toDate')) {
+          this.refs.completedTo.value = sessionStorage.getItem('toDate');
+        } else {
+          document.getElementById('completedTo').value = moment().format('YYYY-MM-DD');
+        }
       }
       this.state.tasks.map((task) => {
         let completedFromObj = document.getElementById('completedFrom').value;
@@ -724,7 +732,7 @@ export default class Mgmt extends React.Component {
           {/* Create user modal ends here */}
           <div>
             <Banner title="Kingdom Hall Maintenance Manager"
-            image = "/images/maintenance.svg"/>
+            image = "/images/khall.svg"/>
           </div>
           <div className="pure-g">
             <div ref="upcomingTasks" className="pure-u-1 pure-u-sm-1-4 item__left">
@@ -772,6 +780,7 @@ export default class Mgmt extends React.Component {
                           let completedFrom = this.refs.completedFrom.value;
                           let completedTo = this.refs.completedTo.value;
                           const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
+                          sessionStorage.setItem('fromDate', completedFrom);
                           this.setState ({ completedTasks });
                         }}/>
                     </div>
@@ -785,6 +794,7 @@ export default class Mgmt extends React.Component {
                           let completedFrom = this.refs.completedFrom.value;
                           let completedTo = this.refs.completedTo.value;
                           const completedTasks = TaskList.find({completed: true, completedOn: {$gte: completedFrom, $lte: completedTo}},{sort:{completedOn: 1}}).fetch();
+                          sessionStorage.setItem('toDate', completedTo);
                           this.setState ({ completedTasks });
                         }}/>
                     </div>

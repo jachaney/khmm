@@ -38,7 +38,7 @@ export default class Login extends React.Component {
             return (alert('Please enter a password.'));
           };
             alert (err.reason);
-            return document.getElementById("login").reset();
+            return this.refs.password.value = "";
         } else {
             this.props.history.push('/mgmt');
             this.props.history.go()
@@ -51,7 +51,7 @@ export default class Login extends React.Component {
       <div className="wrapper">
         <div>
           <Banner title="Kingdom Hall Maintenance Manager"
-          image = "https://image.flaticon.com/icons/svg/564/564939.svg"/>
+          image = "/images/khall.svg"/>
         </div>
         <form className="pure-g" id="login" onSubmit={this.onSubmit.bind(this)} noValidate>
           <div className="pure-u-1 item__middle item-margin">
