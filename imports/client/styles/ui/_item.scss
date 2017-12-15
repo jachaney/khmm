@@ -24,6 +24,44 @@
   margin: 5px 0 0 5px;
   text-align: center;
 }
+.item-UMM-list {
+  border: 1px solid #555555;
+  height: 89%;
+  margin: 1.3rem;
+  overflow-y: auto;
+  text-align: left;
+}
+.item-UMM-list a {
+  background-color: #ffffff;
+  color: black;
+  cursor: default;
+  display: block;
+  padding: 1.5rem;
+  text-decoration: none;
+}
+
+.item-UMM-list a:hover {
+  background-color: #286da8; /* Add a green color to the "active/current" link */
+  color: #ffffff;
+}
+.item-UMM-list a.active {
+  background-color: #286da8;
+  color: #ffffff;
+}
+.item-UMM-userinfo {
+  margin: 1.3rem;
+  text-align: left;
+}
+.item-UMM-padding {
+  padding: 0 1rem 1rem 1rem;
+}
+.item-UMM-input {
+  color: #000000;
+  margin: 0 1rem 1rem 1rem;
+  padding: 1rem;
+  text-align: center;
+  width: 90%;
+}
 .item__top {
   background: #ffffff;
   font-size: 3rem;

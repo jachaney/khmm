@@ -1,3 +1,4 @@
+import { Accounts } from 'meteor/accounts-base';
 import React from 'react';
 import createHistory from 'history/createBrowserHistory';
 import { BrowserRouter as Router, Route, Switch, Link, Redirect } from 'react-router-dom';
@@ -69,6 +70,18 @@ export default class Login extends React.Component {
           </div>
         </form>
         <p><Link to="/newuser" title="Sign Up">Create a new Kingdom Hall account</Link></p>
+        {/* <a onClick={() => {
+          emailAddress = prompt("Please enter your e-mail address");
+          if (!!emailAddress) {
+            Accounts.forgotPassword({email: emailAddress},(err) => {
+              if (err) {
+                return alert(err.reason);
+              } else {
+                return alert("A link to reset your password has been sent to",<br/>,"the e-mail address you provided.");
+              }
+            })
+          }
+        }}>I forgot my password</a> */}
       </div>
     );
   };

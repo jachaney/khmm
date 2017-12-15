@@ -26,6 +26,34 @@
   width: 100%;
   z-index: 1;
 }
+.modal-UMM-wrapper {
+  background-color: rgba(0,0,0,0.4);
+  color: #000000;
+  display: none;
+  height: 100%;
+  left: 0;
+  overflow: auto;
+  position: fixed;
+  scroll-behavior: smooth;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+}
+.modal-UMM-content {
+  background-color: #fefefe;
+  min-height: 45rem;
+  margin: 8rem auto 8rem auto;
+  max-height: 60rem;
+  max-width: 75%;
+  padding: 3rem;
+  width: 45rem;
+}
+.modal-UMM-buttons {
+  text-align: center;
+}
+.modal-banner {
+  text-align: center;
+}
 .modal-content {
   background-color: #fefefe;
   height: auto;

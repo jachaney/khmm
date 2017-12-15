@@ -19,6 +19,7 @@ export default class NewUser extends React.Component {
     e.preventDefault();
     let email = this.refs.email.value.trim();
     let password = this.refs.password.value.trim();
+    let passwordConfirm = this.refs.passwordConfirm.value.trim();
     let firstname = this.refs.firstname.value.trim();
     let lastname = this.refs.lastname.value.trim();
 
@@ -26,6 +27,8 @@ export default class NewUser extends React.Component {
       return (alert('Please enter a valid e-mail address.'));
     } else if (password.length < 8) {
       return (alert('Your password must be at least 8 characters.'));
+    } else if (password != passwordConfirm) {
+      return (alert('Your passwords do not match.'));
     } else if (!firstname) {
       return (alert("Please enter your first name."));
     } else if (!lastname) {
@@ -61,6 +64,10 @@ export default class NewUser extends React.Component {
             <div className="pure-u-1 item__middle item-margin">
               <input className="item--textbox" type="password" ref="password"
                 name="password" placeholder="Please enter a password"/>
+            </div>
+            <div className="pure-u-1 item__middle item-margin">
+              <input className="item--textbox" type="password" ref="passwordConfirm"
+                name="passwordConfirm" placeholder="Please confirm your password"/>
             </div>
             <div className="pure-u-1 item__middle item-margin">
               <input className="item--textbox" ref="firstname"

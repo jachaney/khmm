@@ -25,14 +25,18 @@ export default class Mgmt extends React.Component {
       itemVisible: true,
       lastname: "",
       menuStatus: false,
+      selectedUser: [],
       showAssignTaskModal: false,
       showInviteUserModal: false,
+      showChangePasswordDiv: Boolean,
+      showUMM: false,
+      showUpdateUserButton: false,
       showUserProfileModal: false,
       showUserInfoDiv: Boolean,
-      showChangePasswordDiv: Boolean,
       tasks: [],
       updateProfile: false,
       updatePassword: false,
+      ummUsers: [],
       users: [],
     }
   };
@@ -47,6 +51,8 @@ export default class Mgmt extends React.Component {
       let userSub = Meteor.subscribe('users');
       const users = UserInfoDB.find({}, {sort: {lastname: 1}}).fetch();
       this.setState({ users });
+      const ummUsers = UserInfoDB.find({userId:{$ne: Meteor.userId()}}, {sort: {lastname: 1}}).fetch();
+      this.setState({ ummUsers });
       const currentUser = UserInfoDB.find({userId: Meteor.userId()}).fetch();
       this.setState({ currentUser })
       this.state.currentUser.map((currentUser) => {
@@ -112,6 +118,7 @@ export default class Mgmt extends React.Component {
     e.preventDefault();
     let email = this.refs.email.value.trim();
     let password = this.refs.password.value.trim();
+    let confirmPassword = this.refs.confirmPassword.value.trim();
     let firstname = this.refs.firstName.value.trim();
     let lastname = this.refs.lastName.value.trim();
     let isAdmin = Boolean;
@@ -120,6 +127,10 @@ export default class Mgmt extends React.Component {
       return (alert("Please enter a valid e-mail address"));
     } else if (password.length < 8) {
       return (alert("Your password must be at least 8 characters."));
+    } else if (password != confirmPassword) {
+      this.refs.password.value = "";
+      this.refs.confirmPassword.value = "";
+      return (alert("Your passwords do not match. Please re-enter your passwords."))
     } else if (!firstname) {
       return (alert("Please enter the new user's first name."))
     } else if (!lastname) {
@@ -632,6 +643,124 @@ export default class Mgmt extends React.Component {
     </form>
     })
   }
+
+  renderSelectedUserInfo() {
+    let selectedUser = this.state.selectedUser;
+    return <div key={selectedUser.userId}>
+      <p className="item-UMM-padding">
+        <strong>Logon:</strong>
+      </p>
+      <p className="item-UMM-padding">
+        {selectedUser.email}
+      </p>
+      <p className="item-UMM-padding">
+        <strong>First Name:</strong>
+      </p>
+      <p className="item-UMM-padding">
+        {selectedUser.firstname}
+      </p>
+      <p className="item-UMM-padding">
+        <strong>Last Name:</strong>
+      </p>
+      <p className="item-UMM-padding">
+        {selectedUser.lastname}
+      </p>
+      <p className="item-UMM-padding">
+        <strong>New Password:</strong>
+      </p>
+      <input className="item-UMM-input" type="password" ref="UMMNewPassword"
+        id="UMMNewPassword"
+        onChange={() => {
+          if (this.refs.UMMNewPassword.value.trim().length > 0) {
+            this.setState({showUpdateUserButton: true});
+          } else {
+            this.setState({showUpdateUserButton: false});
+          }
+        }}
+      />
+      <p className="item-UMM-padding"><strong>Confirm Password:</strong></p>
+      <input className="item-UMM-input" type="password" ref="UMMConfirmPassword"
+        id="UMMConfirmPassword"/>
+    </div>
+  }
+  renderUserList() {
+    return this.state.ummUsers.map((user) => {
+      return <a key={user._id} id={user._id}
+        className={this.state.selectedUser._id === user._id ? 'active' : null}
+        onClick={(e) => {
+        let selectedUser = user;
+        this.setState({selectedUser});
+      }}>
+        {user.lastname},{user.firstname}
+      </a>
+    })
+  }
+  renderUMM() {
+    let selectedUser = this.state.selectedUser;
+    return this.state.currentUser.map((user) => {
+      return <div ref="UMModal" key={user._id} className="modal-UMM-wrapper"
+        style={{display: this.state.showUMM ? 'block' : 'none'}}>
+        <div className="modal-UMM-content">
+          <div className="pure-g">
+            <div className="modal-banner pure-u-1">
+              <span className="fa fa-users modal_usericon item-banner-padding"/>
+              <h2 ref="UMMLabel" className="modal_text">User Management</h2>
+            </div>
+            <div className="pure-u-1-2">
+              <div className="item-UMM-list">
+                {this.renderUserList()}
+              </div>
+            </div>
+            <div className="pure-u-1-2">
+              <div className="item-UMM-userinfo">
+                {this.renderSelectedUserInfo()}
+              </div>
+            </div>
+          </div>
+          <div className="modal-UMM-buttons">
+            <button className="button__green"
+              style={{display: this.state.showUpdateUserButton ? 'inline' : 'none'}}
+              onClick={(e) => {
+                e.preventDefault();
+                let newEmail = this.refs.UMMEmail.value.trim();
+                let _id = selectedUser._id;
+                let userId = selectedUser.userId;
+                Meteor.call('user.update.logon', _id, userId, newEmail);
+                console.log("the userid is: ",this.state.selectedUser.userId);
+                console.log("the _id is: ",this.state.selectedUser._id);
+              }}>
+                Update Profile
+            </button>
+            <button className="button__red"
+              style={{display: this.state.selectedUser.length != 0 ? 'inline' : 'none'}}
+              onClick={() => {
+                let yes = confirm("Are you sure that you want to remove " + selectedUser.firstname + " " + selectedUser.lastname + " from your domain?");
+                if (yes == true) {
+                  let _id = selectedUser._id;
+                  let userId = selectedUser.userId;
+                  Meteor.call('user.remove', _id, userId);
+                  console.log("you have removed the user");
+                } else {
+                  console.log("you chose not to remove the user");
+                }
+              }}
+            >
+                Delete User
+            </button>
+            <button className="button__red"
+              onClick={(e) => {
+                e.preventDefault();
+                this.setState({selectedUser: []});
+                this.setState({showUMM: false});
+                this.setState({showUpdateUserButton: false});
+              }}>
+                Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    })
+  }
 //End Modal Section
   render () {
     return (
@@ -639,6 +768,7 @@ export default class Mgmt extends React.Component {
         {this.renderAssignedTaskModal()}
         {this.renderInviteUserModal()}
         {this.renderUserProfileModal()}
+        {this.renderUMM()}
         <div id="loader" className="loader"></div>
         <div id="content">
           {/* Sidenav starts here */}
@@ -680,6 +810,16 @@ export default class Mgmt extends React.Component {
               }>
                 Invite a User
               </a>
+              <a ref="userManagement" onClick={() => {
+                document.getElementById("mySidenav").style.width = "0";
+                document.getElementById("sidenav-button").style.left = "0";
+                this.setState({menuStatus: ""})
+                document.getElementById("sidenav-button-icon").className = "fa fa-navicon item-menu-icon";
+                this.setState({showUMM: true});
+                console.log("User Management Console =", this.state.showUMM);
+              }}>
+                User Management
+              </a>
               <a ref="logout" onClick={this.onLogout.bind(this)}>
                 Logout
               </a>
@@ -706,6 +846,10 @@ export default class Mgmt extends React.Component {
                 <div>
                   <input className="modal_text modal_input" type="password" ref="password"
                     name="password" placeholder="Please enter the new user's password"/>
+                </div>
+                <div>
+                  <input className="modal_text modal_input" type="password" ref="confirmPassword"
+                    name="password" placeholder="Please confirm the new user's password"/>
                 </div>
                 <div>
                   <input className="modal_text modal_input" type="text" ref="firstName"
