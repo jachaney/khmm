@@ -66,6 +66,7 @@ export default class Mgmt extends React.Component {
           this.refs.upcomingTasks.style.display = "none";
           this.refs.completedTasks.style.display = "none";
           this.refs.workNeeded.style.display = "none";
+          this.refs.userManagement.style.display = "none";
           this.refs.assignedTasks.className = "pure-u-1 item__middle";
         }
         if(!!currentUser.newPrimeId) {
