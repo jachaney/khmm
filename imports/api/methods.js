@@ -491,13 +491,22 @@ Meteor.methods({
       }
     },{upsert: true})
   },
-  'user.update.lastname'(_id, userId, lastname) {
+  'user.update.lastnameANDadmin'(_id, userId, lastname, isAdmin, primeId) {
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
     }
     UserInfoDB.update({userId},{
       $set:{
+        isAdmin,
         lastname 
+      }
+    },{upsert: true})
+    Meteor.users.update({_id: userId},{
+      $set: {
+        profile: {
+          isAdmin,
+          primeId
+        }
       }
     },{upsert: true})
   },

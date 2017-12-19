@@ -37,6 +37,7 @@ export default class Mgmt extends React.Component {
       updateProfile: false,
       updatePassword: false,
       ummUsers: [],
+      UMMUserIsAdmin: Boolean,
       users: [],
       userUpdated: false,
     }
@@ -145,6 +146,11 @@ export default class Mgmt extends React.Component {
     }
     Meteor.call('user.create', email, password, isAdmin, firstname, lastname);
     alert("User created")
+    this.refs.email.value = "";
+    this.refs.password.value = "";
+    this.refs.confirmPassword.value = "";
+    this.refs.firstname.value = "";
+    this.refs.lastname.value = "";
     this.refs.createUserModal.style.display = "none";
   }
 
@@ -648,7 +654,25 @@ export default class Mgmt extends React.Component {
 
   renderSelectedUserInfo() {
     let selectedUser = this.state.selectedUser;
+    let adminIsChecked = selectedUser.isAdmin;
     return <div key={selectedUser.userId}>
+      <input type="checkbox" defaultChecked={adminIsChecked} ref="UMMIsAdmin"
+        value="true" className="item--checkbox--padding"
+        onChange={() => {
+          if (this.refs.UMMIsAdmin.checked != selectedUser.isAdmin
+            || this.refs.UMMLastName != selectedUser.lastname
+            || this.refs.UMMNewPassword.value.trim() != 0) {
+            this.setState({showUpdateUserButton: true});
+          } else {
+            this.setState({showUpdateUserButton: false});
+          }
+          if (!!this.refs.UMMIsAdmin.checked) {
+            this.setState({UMMUserIsAdmin: true});
+          } else {
+            this.setState({UMMUserIsAdmin: false});
+          }
+        }}/>
+      <label> Administrator</label>
       <p className="item-UMM-padding">
         <strong>Logon:</strong>
       </p>
@@ -667,11 +691,12 @@ export default class Mgmt extends React.Component {
       <input type="text" className="item-UMM-input" ref="UMMLastName"
         defaultValue={selectedUser.lastname}
         onChange={() => {
-          if (this.refs.UMMLastName.value.trim() === selectedUser.lastname && 
-          this.refs.UMMNewPassword.value.trim().length == 0) {
-            this.setState({showUpdateUserButton: false});
-          } else {
+          if (this.refs.UMMLastName.value.trim() != selectedUser.lastname 
+          || this.refs.UMMNewPassword.value.trim().length != 0
+          || this.refs.UMMIsAdmin.checked != selectedUser.isAdmin) {
             this.setState({showUpdateUserButton: true});
+          } else {
+            this.setState({showUpdateUserButton: false});
           }
         }}/>
       <p className="item-UMM-padding">
@@ -680,11 +705,12 @@ export default class Mgmt extends React.Component {
       <input className="item-UMM-input" type="password" ref="UMMNewPassword"
         id="UMMNewPassword"
         onChange={() => {
-          if (this.refs.UMMNewPassword.value.trim().length == 0
-          && this.refs.UMMLastName.value.trim() === selectedUser.lastname) {
-            this.setState({showUpdateUserButton: false});
-          } else {
+          if (this.refs.UMMNewPassword.value.trim().length != 0
+          || this.refs.UMMLastName.value.trim() != selectedUser.lastname
+          || this.refs.UMMIsAdmin.checked != selectedUser.isAdmin) {
             this.setState({showUpdateUserButton: true});
+          } else {
+            this.setState({showUpdateUserButton: false});
           }
         }}
       />
@@ -735,16 +761,19 @@ export default class Mgmt extends React.Component {
                 let lastname = this.refs.UMMLastName.value.trim();
                 let _id = selectedUser._id;
                 let userId = selectedUser.userId;
+                let primeId = selectedUser.primeId;
                 let newPassword = this.refs.UMMNewPassword.value.trim();
                 let confirmPassword = this.refs.UMMConfirmPassword.value.trim();
+                let isAdmin = this.refs.UMMIsAdmin.checked;
                 if (this.refs.UMMLastName.value.trim().length == 0 ) {
                   this.refs.UMMLastName.value = selectedUser.lastname;
                   this.setState({showUpdateUserButton: false});
                   return (alert("You must enter a last name."));
-                } else if (this.refs.UMMLastName.value.trim() != selectedUser.lastname) {
+                } else if (this.refs.UMMLastName.value.trim() != selectedUser.lastname
+                  || this.refs.UMMIsAdmin.checked != selectedUser.isAdmin) {
                   this.setState({userUpdated: true});
                   this.setState({showUpdateUserButton: false});                  
-                  Meteor.call('user.update.lastname', _id, userId, lastname);
+                  Meteor.call('user.update.lastnameANDadmin', _id, userId, lastname, isAdmin, primeId);
                 }
                 if (newPassword.length != 0 && newPassword === confirmPassword) {
                   this.setState({showUpdateUserButton: false});
@@ -752,13 +781,13 @@ export default class Mgmt extends React.Component {
                   Meteor.call('user.setNewPassword', userId, newPassword);
                   this.refs.UMMNewPassword.value = "";
                   this.refs.UMMConfirmPassword.value = "";
-                  return (alert("The users password has been changed."));
                 } else if (newPassword != confirmPassword) {
                   this.refs.UMMNewPassword.value = "";
                   this.refs.UMMConfirmPassword.value = "";
                   this.setState({showUpdateUserButton: false});
                   return (alert("Your passwords don't match. Please re-enter your new password."))
                 }
+                return alert("The user's information has been updated.");
               }}>
                 Update Profile
             </button>
