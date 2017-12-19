@@ -38,6 +38,7 @@ export default class Mgmt extends React.Component {
       updatePassword: false,
       ummUsers: [],
       users: [],
+      userUpdated: false,
     }
   };
 
@@ -662,19 +663,27 @@ export default class Mgmt extends React.Component {
       <p className="item-UMM-padding">
         <strong>Last Name:</strong>
       </p>
-      <p className="item-UMM-padding">
-        {selectedUser.lastname}
-      </p>
+      <input type="text" className="item-UMM-input" ref="UMMLastName"
+        defaultValue={selectedUser.lastname}
+        onChange={() => {
+          if (this.refs.UMMLastName.value.trim() === selectedUser.lastname && 
+          this.refs.UMMNewPassword.value.trim().length == 0) {
+            this.setState({showUpdateUserButton: false});
+          } else {
+            this.setState({showUpdateUserButton: true});
+          }
+        }}/>
       <p className="item-UMM-padding">
         <strong>New Password:</strong>
       </p>
       <input className="item-UMM-input" type="password" ref="UMMNewPassword"
         id="UMMNewPassword"
         onChange={() => {
-          if (this.refs.UMMNewPassword.value.trim().length > 0) {
-            this.setState({showUpdateUserButton: true});
-          } else {
+          if (this.refs.UMMNewPassword.value.trim().length == 0
+          && this.refs.UMMLastName.value.trim() === selectedUser.lastname) {
             this.setState({showUpdateUserButton: false});
+          } else {
+            this.setState({showUpdateUserButton: true});
           }
         }}
       />
@@ -718,16 +727,37 @@ export default class Mgmt extends React.Component {
             </div>
           </div>
           <div className="modal-UMM-buttons">
-            <button className="button__green"
+            <button className="button__green" type="submit"
               style={{display: this.state.showUpdateUserButton ? 'inline' : 'none'}}
               onClick={(e) => {
                 e.preventDefault();
-                let newEmail = this.refs.UMMEmail.value.trim();
+                let lastname = this.refs.UMMLastName.value.trim();
                 let _id = selectedUser._id;
                 let userId = selectedUser.userId;
-                Meteor.call('user.update.logon', _id, userId, newEmail);
-                console.log("the userid is: ",this.state.selectedUser.userId);
-                console.log("the _id is: ",this.state.selectedUser._id);
+                let newPassword = this.refs.UMMNewPassword.value.trim();
+                let confirmPassword = this.refs.UMMConfirmPassword.value.trim();
+                if (this.refs.UMMLastName.value.trim().length == 0 ) {
+                  this.refs.UMMLastName.value = selectedUser.lastname;
+                  this.setState({showUpdateUserButton: false});
+                  return (alert("You must enter a last name."));
+                } else if (this.refs.UMMLastName.value.trim() != selectedUser.lastname) {
+                  this.setState({userUpdated: true});
+                  this.setState({showUpdateUserButton: false});                  
+                  Meteor.call('user.update.lastname', _id, userId, lastname);
+                }
+                if (newPassword.length != 0 && newPassword === confirmPassword) {
+                  this.setState({showUpdateUserButton: false});
+                  this.setState({userUpdated: true});
+                  Meteor.call('user.setNewPassword', userId, newPassword);
+                  this.refs.UMMNewPassword.value = "";
+                  this.refs.UMMConfirmPassword.value = "";
+                  return (alert("The users password has been changed."));
+                } else if (newPassword != confirmPassword) {
+                  this.refs.UMMNewPassword.value = "";
+                  this.refs.UMMConfirmPassword.value = "";
+                  this.setState({showUpdateUserButton: false});
+                  return (alert("Your passwords don't match. Please re-enter your new password."))
+                }
               }}>
                 Update Profile
             </button>
@@ -740,8 +770,6 @@ export default class Mgmt extends React.Component {
                   let userId = selectedUser.userId;
                   Meteor.call('user.remove', _id, userId);
                   console.log("you have removed the user");
-                } else {
-                  console.log("you chose not to remove the user");
                 }
               }}
             >
@@ -753,8 +781,9 @@ export default class Mgmt extends React.Component {
                 this.setState({selectedUser: []});
                 this.setState({showUMM: false});
                 this.setState({showUpdateUserButton: false});
+                this.setState({userUpdated: false});
               }}>
-                Cancel
+                {this.state.userUpdated ? 'Close' : 'Cancel'}
             </button>
           </div>
         </div>

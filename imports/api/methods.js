@@ -491,19 +491,23 @@ Meteor.methods({
       }
     },{upsert: true})
   },
-  'user.update.logon'(_id, userId, newEmail) {
+  'user.update.lastname'(_id, userId, lastname) {
     if (!this.userId) {
       throw new Meteor.Error('Unauthorized access');
     }
-    Meteor.users.update({_id: userId},{
+    UserInfoDB.update({userId},{
       $set:{
-        emails: {
-          [0]: {
-            address: newEmail,
-          }
-        }
+        lastname 
       }
     },{upsert: true})
+  },
+  'user.setNewPassword'(userId, newPassword) {
+    if (!this.userId) {
+      throw new Meteor.Error('Unauthorized access');
+    }
+    if (Meteor.isServer) {
+      Accounts.setPassword(userId, newPassword);
+    }
   },
 // Job Hazard Analysis methods begin there
   'jhaForm.update' (formId,location,scheduledDate,preparedBy,preparedDate,reviewedBy,reviewedDate) {

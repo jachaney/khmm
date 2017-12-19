@@ -1,4 +1,3 @@
-import { Accounts } from 'meteor/accounts-base';
 import React from 'react';
 import createHistory from 'history/createBrowserHistory';
 import { BrowserRouter as Router, Route, Switch, Link, Redirect } from 'react-router-dom';
@@ -54,34 +53,20 @@ export default class Login extends React.Component {
           <Banner title="Kingdom Hall Maintenance Manager"
           image = "/images/khall.svg"/>
         </div>
-        <form className="pure-g" id="login" onSubmit={this.onSubmit.bind(this)} noValidate>
-          <div className="pure-u-1 item__middle item-margin">
-            <p>Please enter your e-mail address:</p>
-            <input className="item--textbox" type="email" ref="email" name="email"/>
-          </div>
-          <div className="pure-u-1 item__middle item-margin">
-            <p>Please enter your password:</p>
-            <input className="item--textbox" type="password" ref="password" name="password"/>
-          </div>
-          <div className="pure-u-1 item__middle">
+        <form className="item-login" id="login" onSubmit={this.onSubmit.bind(this)} noValidate>
+          <p className="form">
+            <input className="item-input" type="email" ref="email" name="email" placeholder="Please enter your e-mail address"/>
+          </p>
+          <p className="form">
+            <input className="item-input" type="password" ref="password" name="password" placeholder="Please enter your password"/>
+          </p>
+          <p className="button_center">
             <button className="button__green">
               Login
             </button>
-          </div>
+          </p>
         </form>
-        <p><Link to="/newuser" title="Sign Up">Create a new Kingdom Hall account</Link></p>
-        {/* <a onClick={() => {
-          emailAddress = prompt("Please enter your e-mail address");
-          if (!!emailAddress) {
-            Accounts.forgotPassword({email: emailAddress},(err) => {
-              if (err) {
-                return alert(err.reason);
-              } else {
-                return alert("A link to reset your password has been sent to",<br/>,"the e-mail address you provided.");
-              }
-            })
-          }
-        }}>I forgot my password</a> */}
+        <p><Link to="/newuser" title="NewUser">Create a new Kingdom Hall account</Link></p>
       </div>
     );
   };
